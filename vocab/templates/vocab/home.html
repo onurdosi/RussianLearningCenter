@@ -1,0 +1,28 @@
+{% extends 'vocab/base.html' %}
+
+{% block content %}
+    <h2>Welcome</h2>
+    <p>
+        This is my Russian vocabulary learning app. It helps users save words,
+        track difficulty, and add personal notes for better context.
+    </p>
+
+    <div class="stats-box">
+        <h3>Statistics</h3>
+        <ul>
+            <li>Total words: {{ total_words }}</li>
+            <li>Easy words: {{ easy_words }}</li>
+            <li>Medium words: {{ medium_words }}</li>
+            <li>Hard words: {{ hard_words_count }}</li>
+        </ul>
+    </div>
+
+    <h3>What you can do</h3>
+    <ul>
+        <li>Save Russian words</li>
+        <li>Add translations</li>
+        <li>Track difficulty</li>
+        <li>Add personal notes</li>
+        <li>Review hard words separately</li>
+    </ul>
+{% endblock %}
