@@ -1,0 +1,40 @@
+{% extends 'vocab/base.html' %}
+
+{% block content %}
+<h2>Quick Add Words</h2>
+
+<div class="word-card">
+    <p>
+        Add multiple words at once by entering Russian words and translations
+        separated by commas.
+    </p>
+    <p>
+        The words and translations must be in the same order.
+    </p>
+</div>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+
+    <p>
+        {{ form.russian_words.label_tag }}
+        {{ form.russian_words }}
+        {{ form.russian_words.errors }}
+    </p>
+
+    <p>
+        {{ form.translations.label_tag }}
+        {{ form.translations }}
+        {{ form.translations.errors }}
+    </p>
+
+    <p>
+        {{ form.difficulty.label_tag }}
+        {{ form.difficulty }}
+        {{ form.difficulty.errors }}
+    </p>
+
+    <button type="submit">Save Bulk</button>
+</form>
+{% endblock %}

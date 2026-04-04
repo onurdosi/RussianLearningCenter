@@ -1,11 +1,21 @@
 {% extends 'vocab/base.html' %}
 
 {% block content %}
-    <h2>{{ title }}</h2>
+<h2>{{ title }}</h2>
 
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Save Word</button>
-    </form>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Save Word</button>
+</form>
+
+{% if title == 'Add Word' %}
+    <div class="word-card">
+        <h3>Add words in bulk</h3>
+        <p>
+            Need to add several words at once? Use Quick Add
+        </p>
+        <a href="{% url 'quick_add_words' %}" class="button-link">Quick Add</a>
+    </div>
+{% endif %}
 {% endblock %}

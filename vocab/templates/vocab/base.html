@@ -51,6 +51,7 @@
             border-radius: 8px;
             padding: 15px;
             margin-bottom: 15px;
+            margin-top: 25px;   /* ADD THIS LINE */
             background-color: #fafafa;
         }
 
@@ -74,13 +75,19 @@
         input, textarea, select {
             width: 100%;
             max-width: 500px;
-            max-width: 500px;
             padding: 8px;
             margin-top: 5px;
             margin-bottom: 12px;
             border: 1px solid #bbb;
             border-radius: 6px;
             box-sizing: border-box;
+            display: block;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: bold;
         }
 
         select {
@@ -96,6 +103,31 @@
             border-top: 1px solid #ddd;
             margin: 15px 0;
         }
+
+        .message {
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .message-success {
+            background-color: #e8f5e9;
+            border: 1px solid #c8e6c9;
+            color: #2e7d32;
+        }
+
+        .message-info {
+            background-color: #e3f2fd;
+            border: 1px solid #bbdefb;
+            color: #1565c0;
+        }
+
+        .message-error {
+            background-color: #ffebee;
+            border: 1px solid #ffcdd2;
+            color: #c62828;
+        }
     </style>
 </head>
 <body>
@@ -110,6 +142,16 @@
         </div>
 
         <hr>
+
+        <hr>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="message message-{{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
 
         {% block content %}
         {% endblock %}

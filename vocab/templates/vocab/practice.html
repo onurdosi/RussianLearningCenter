@@ -1,55 +1,87 @@
 {% extends 'vocab/base.html' %}
 
 {% block content %}
-    <h2>Practice Mode</h2>
+<h2>Practice Mode</h2>
 
-    {% if not_enough_words %}
-        <div class="word-card">
-            <p>You need at least 3 words to use practice mode.</p>
-            <p>Add more words first, then come back and practice.</p>
-        </div>
-    {% else %}
-        <div class="word-card">
-            <p><strong>Russian word:</strong> {{ current_word.russian_word }}</p>
+{% if choose_difficulty %}
+    <div class="word-card">
+        <form method="get">
+            <p>
+                <label for="difficulty"><strong>Choose difficulty:</strong></label>
+            </p>
+            <select name="difficulty" id="difficulty">
+                <option value="any">Any</option>
+                <option value="easy">Easy</option>
+                <option value="medium">Medium</option>
+                <option value="hard">Hard</option>
+            </select>
+            <button type="submit">Start Practice</button>
+        </form>
+    </div>
 
-            {% if result %}
-                {% if result == 'correct' %}
-                    <p><strong>Correct!</strong></p>
-                {% else %}
-                    <p><strong>Wrong.</strong></p>
-                {% endif %}
+{% elif not_enough_words %}
+    <div class="word-card">
+        <p>You need at least 3 words in the selected difficulty to use practice mode.</p>
+        <a href="{% url 'practice_word' %}" class="button-link">Choose Another Difficulty</a>
+    </div>
 
+{% elif practice_complete %}
+    <div class="word-card">
+        <h3>Practice complete</h3>
+        <p><strong>Final score:</strong> {{ score }}/{{ total_words }}</p>
+        <a href="{% url 'practice_word' %}?restart=1" class="button-link">Play Again</a>
+    </div>
+
+{% else %}
+    <div class="word-card">
+        <p><strong>Difficulty:</strong>
+            {% if selected_difficulty == 'any' %}
+                Any
+            {% else %}
+                {{ selected_difficulty|title }}
+            {% endif %}
+        </p>
+
+        <p><strong>Question:</strong> {{ current_number }}/{{ total_words }}</p>
+        <p><strong>Russian word:</strong> {{ current_word.russian_word }}</p>
+
+        {% if result %}
+            {% if result == 'correct' %}
+                <p><strong>Correct!</strong></p>
+            {% else %}
+                <p><strong>Wrong.</strong></p>
                 <p><strong>Correct answer:</strong> {{ correct_answer }}</p>
 
                 {% if current_word.notes %}
-                    <p><strong>Hint / Notes:</strong> {{ current_word.notes }}</p>
-                {% else %}
-                    <p><strong>Hint / Notes:</strong> No notes available.</p>
-                {% endif %}
-
-                <a href="{% url 'practice_word' %}" class="button-link">Next Word</a>
-            {% else %}
-                <form method="post">
-                    {% csrf_token %}
-
-                    {% for option in options %}
-                        <p>
-                            <button type="submit" name="selected_answer" value="{{ option }}">
-                                {{ option }}
-                            </button>
-                        </p>
-                    {% endfor %}
-                </form>
-
-                {% if current_word.notes %}
                     <details>
-                        <summary>Show hint</summary>
+                        <summary>Show Hint</summary>
                         <p>{{ current_word.notes }}</p>
                     </details>
-                {% else %}
-                    <p><em>No hint available for this word.</em></p>
                 {% endif %}
             {% endif %}
-        </div>
-    {% endif %}
+
+            <a href="{% url 'practice_word' %}" class="button-link">Next Word</a>
+        {% else %}
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="word_id" value="{{ current_word.id }}">
+
+                {% for option in options %}
+                    <p>
+                        <button type="submit" name="selected_answer" value="{{ option }}">
+                            {{ option }}
+                        </button>
+                    </p>
+                {% endfor %}
+            </form>
+
+            {% if current_word.notes %}
+                <details>
+                    <summary>Show Hint</summary>
+                    <p>{{ current_word.notes }}</p>
+                </details>
+            {% endif %}
+        {% endif %}
+    </div>
+{% endif %}
 {% endblock %}
