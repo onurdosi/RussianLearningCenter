@@ -136,7 +136,14 @@ def practice_word(request):
         selected_answer = request.POST.get('selected_answer')
         word_id = request.POST.get('word_id')
 
-        current_word = get_object_or_404(Word, id=word_id)
+        try:
+            current_word = Word.objects.get(id=word_id)
+        except Word.DoesNotExist:
+            request.session.pop('practice_word_ids', None)
+            request.session.pop('practice_index', None)
+            request.session.pop('practice_score', None)
+            request.session.pop('practice_difficulty', None)
+            return redirect('practice_word')
         practice_word_ids = request.session.get('practice_word_ids', [])
         practice_index = request.session.get('practice_index', 0)
         practice_score = request.session.get('practice_score', 0)
@@ -209,7 +216,15 @@ def practice_word(request):
         })
 
     current_word_id = practice_word_ids[practice_index]
-    current_word = get_object_or_404(Word, id=current_word_id)
+
+    try:
+        current_word = Word.objects.get(id=current_word_id)
+    except Word.DoesNotExist:
+        request.session.pop('practice_word_ids', None)
+        request.session.pop('practice_index', None)
+        request.session.pop('practice_score', None)
+        request.session.pop('practice_difficulty', None)
+        return redirect('practice_word')
 
     available_wrong_words = list(
         Word.objects.exclude(id=current_word.id)
