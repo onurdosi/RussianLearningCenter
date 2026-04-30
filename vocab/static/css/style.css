@@ -1,125 +1,82 @@
 body {
     font-family: Arial, sans-serif;
-    background-color: #f4f6f8;
+    background-color: #f0f2f5;
     margin: 0;
-    padding: 0;
 }
 
 .page {
     max-width: 900px;
-    margin: 30px auto;
+    margin: 40px auto;
     background: white;
-    padding: 25px;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.08);
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
-h1, h2, h3 {
-    color: #2c3e50;
+h1 {
+    text-align: center;
 }
 
 .nav {
-    margin-bottom: 20px;
+    text-align: center;
+    margin-bottom: 25px;
 }
 
 .nav a {
     text-decoration: none;
-    margin-right: 12px;
-    color: #1565c0;
-    font-weight: bold;
+    margin: 0 10px;
+    padding: 8px 12px;
+    background: #1565c0;
+    color: white;
+    border-radius: 6px;
 }
 
 .nav a:hover {
-    text-decoration: underline;
-}
-
-.stats-box {
-    background-color: #eef4ff;
-    border: 1px solid #d6e4ff;
-    padding: 15px;
-    border-radius: 8px;
-    margin-bottom: 20px;
+    background: #0d47a1;
 }
 
 .word-card {
     border: 1px solid #ddd;
-    border-radius: 8px;
+    border-radius: 10px;
     padding: 15px;
-    margin-bottom: 15px;
-    margin-top: 25px;
+    margin-bottom: 20px;
     background-color: #fafafa;
 }
 
 .button-link,
 button {
-    display: inline-block;
     padding: 8px 14px;
     background-color: #1565c0;
     color: white;
-    text-decoration: none;
     border: none;
     border-radius: 6px;
     cursor: pointer;
 }
 
-.button-link:hover,
-button:hover {
+button:hover,
+.button-link:hover {
     background-color: #0d47a1;
 }
 
 input, textarea, select {
     width: 100%;
-    max-width: 500px;
     padding: 8px;
     margin-top: 5px;
     margin-bottom: 12px;
-    border: 1px solid #bbb;
     border-radius: 6px;
-    box-sizing: border-box;
-    display: block;
-}
-
-label {
-    display: block;
-    margin-bottom: 6px;
-    font-weight: bold;
-}
-
-select {
-    max-width: 220px;
-}
-
-ul {
-    padding-left: 20px;
-}
-
-hr {
-    border: none;
-    border-top: 1px solid #ddd;
-    margin: 15px 0;
+    border: 1px solid #ccc;
 }
 
 .message {
-    padding: 12px 15px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    font-weight: bold;
+    padding: 12px;
+    border-radius: 6px;
+    margin-bottom: 15px;
 }
 
 .message-success {
     background-color: #e8f5e9;
-    border: 1px solid #c8e6c9;
-    color: #2e7d32;
-}
-
-.message-info {
-    background-color: #e3f2fd;
-    border: 1px solid #bbdefb;
-    color: #1565c0;
 }
 
 .message-error {
     background-color: #ffebee;
-    border: 1px solid #ffcdd2;
-    color: #c62828;
 }
