@@ -1,41 +1,46 @@
 {% extends 'vocab/base.html' %}
 
 {% block content %}
-    <h2>All Words</h2>
+<h2>All Words</h2>
 
-    <div class="word-card">
-        <form method="get">
-            <p>
-                <label for="difficulty"><strong>Filter by difficulty:</strong></label>
-            </p>
+<div class="word-card">
+    <form method="get">
 
-            <select name="difficulty" id="difficulty">
+        <p>
+            <label><strong>Search:</strong></label>
+            <input type="text" name="search" value="{{ search_query }}">
+        </p>
+
+        <p>
+            <label><strong>Filter by difficulty:</strong></label>
+            <select name="difficulty">
                 <option value="">All</option>
                 <option value="easy" {% if selected_difficulty == 'easy' %}selected{% endif %}>Easy</option>
                 <option value="medium" {% if selected_difficulty == 'medium' %}selected{% endif %}>Medium</option>
                 <option value="hard" {% if selected_difficulty == 'hard' %}selected{% endif %}>Hard</option>
             </select>
+        </p>
 
-            <button type="submit">Apply Filter</button>
-        </form>
+        <button type="submit">Apply</button>
+    </form>
+</div>
+
+{% for word in words %}
+    <div class="word-card">
+        <p><strong>Russian word:</strong> {{ word.russian_word }}</p>
+        <p><strong>Translation:</strong> {{ word.translation }}</p>
+        <p><strong>Difficulty:</strong> {{ word.get_difficulty_display }}</p>
+
+        {% if word.notes %}
+            <p><strong>Notes:</strong> {{ word.notes }}</p>
+        {% endif %}
+
+        <a href="{% url 'edit_word' word.id %}" class="button-link">Edit</a>
+        <a href="{% url 'delete_word' word.id %}" class="button-link">Delete</a>
     </div>
+{% endfor %}
 
-    {% for word in words %}
-        <div class="word-card">
-            <p><strong>Russian word:</strong> {{ word.russian_word }}</p>
-            <p><strong>Translation:</strong> {{ word.translation }}</p>
-            <p><strong>Difficulty:</strong> {{ word.get_difficulty_display }}</p>
-
-            {% if word.notes %}
-                <p><strong>Notes:</strong> {{ word.notes }}</p>
-            {% endif %}
-
-            <a href="{% url 'edit_word' word.id %}" class="button-link">Edit</a>
-            <a href="{% url 'delete_word' word.id %}" class="button-link">Delete</a>
-        </div>
-    {% endfor %}
-
-    {% if not words %}
-        <p>No words found for this filter.</p>
-    {% endif %}
+{% if not words %}
+    <p>No results found.</p>
+{% endif %}
 {% endblock %}

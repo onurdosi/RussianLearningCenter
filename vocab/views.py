@@ -24,16 +24,26 @@ def home(request):
 
 def word_list(request):
     selected_difficulty = request.GET.get('difficulty')
+    search_query = request.GET.get('search', '').strip()
+
+    words = Word.objects.all()
 
     if selected_difficulty in ['easy', 'medium', 'hard']:
-        words = Word.objects.filter(difficulty=selected_difficulty)
+        words = words.filter(difficulty=selected_difficulty)
     else:
-        words = Word.objects.all()
         selected_difficulty = ''
+
+    if search_query:
+        words = words.filter(
+            russian_word__icontains=search_query
+        ) | words.filter(
+            translation__icontains=search_query
+        )
 
     context = {
         'words': words,
         'selected_difficulty': selected_difficulty,
+        'search_query': search_query,
     }
 
     return render(request, 'vocab/word_list.html', context)
