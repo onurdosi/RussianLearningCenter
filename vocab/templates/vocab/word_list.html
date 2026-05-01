@@ -5,15 +5,14 @@
 
 <div class="word-card">
     <form method="get">
-
         <p>
             <label><strong>Search:</strong></label>
-            <input type="text" name="search" value="{{ search_query }}" placeholder="Search Russian word or translation">
+            <input id="search-box" type="text" name="search" value="{{ search_query }}" placeholder="Search Russian word or translation">
         </p>
 
         <p>
             <label><strong>Filter by difficulty:</strong></label>
-            <select name="difficulty">
+            <select name="difficulty" onchange="clearSearchAndSubmit(this.form)">
                 <option value="">All</option>
                 <option value="easy" {% if selected_difficulty == 'easy' %}selected{% endif %}>Easy</option>
                 <option value="medium" {% if selected_difficulty == 'medium' %}selected{% endif %}>Medium</option>
@@ -21,7 +20,7 @@
             </select>
         </p>
 
-        <button type="submit">Apply</button>
+        <button type="submit">Search</button>
         <a href="{% url 'word_list' %}" class="button-link">Clear</a>
     </form>
 </div>
@@ -51,4 +50,12 @@
 {% if not words %}
     <p>No results found. Try changing your search or filter.</p>
 {% endif %}
+
+<script>
+    function clearSearchAndSubmit(form) {
+        const searchBox = document.getElementById('search-box');
+        searchBox.value = '';
+        form.submit();
+    }
+</script>
 {% endblock %}
