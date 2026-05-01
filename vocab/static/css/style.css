@@ -105,17 +105,28 @@ label {
 }
 
 .message {
-    padding: 12px;
+    padding: 12px 14px;
     border-radius: 6px;
     margin-bottom: 15px;
+    font-weight: bold;
 }
 
 .message-success {
     background-color: #e8f5e9;
+    color: #1b5e20;
+    border: 1px solid #a5d6a7;
+}
+
+.message-info {
+    background-color: #e3f2fd;
+    color: #0d47a1;
+    border: 1px solid #90caf9;
 }
 
 .message-error {
     background-color: #ffebee;
+    color: #b71c1c;
+    border: 1px solid #ef9a9a;
 }
 
 .stats-box {

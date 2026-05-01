@@ -1,5 +1,7 @@
 import random
 
+from django.contrib import messages
+from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 
 from .forms import QuickAddForm, WordForm
@@ -35,9 +37,8 @@ def word_list(request):
 
     if search_query:
         words = words.filter(
-            russian_word__icontains=search_query
-        ) | words.filter(
-            translation__icontains=search_query
+            Q(russian_word__icontains=search_query) |
+            Q(translation__icontains=search_query)
         )
 
     result_count = words.count()
@@ -56,7 +57,11 @@ def add_word(request):
     if request.method == 'POST':
         form = WordForm(request.POST)
         if form.is_valid():
-            form.save()
+            word = form.save()
+            messages.success(
+                request,
+                f'"{word.russian_word}" was added to your vocabulary.'
+            )
             return redirect('word_list')
     else:
         form = WordForm()
@@ -80,6 +85,8 @@ def quick_add_words(request):
             }
 
             words_added_in_this_batch = set()
+            added_count = 0
+            skipped_count = 0
 
             for russian_word, translation in zip(russian_words, translations):
                 normalized_word = russian_word.strip().lower()
@@ -88,6 +95,7 @@ def quick_add_words(request):
                     normalized_word in existing_words_normalized or
                     normalized_word in words_added_in_this_batch
                 ):
+                    skipped_count += 1
                     continue
 
                 Word.objects.create(
@@ -97,6 +105,19 @@ def quick_add_words(request):
                     notes='',
                 )
                 words_added_in_this_batch.add(normalized_word)
+                added_count += 1
+
+            if added_count > 0:
+                messages.success(
+                    request,
+                    f'{added_count} word(s) added successfully.'
+                )
+
+            if skipped_count > 0:
+                messages.info(
+                    request,
+                    f'{skipped_count} duplicate word(s) were skipped.'
+                )
 
             return redirect('word_list')
     else:
@@ -113,7 +134,11 @@ def edit_word(request, word_id):
     if request.method == 'POST':
         form = WordForm(request.POST, instance=word)
         if form.is_valid():
-            form.save()
+            updated_word = form.save()
+            messages.success(
+                request,
+                f'"{updated_word.russian_word}" was updated successfully.'
+            )
             return redirect('word_list')
     else:
         form = WordForm(instance=word)
@@ -128,7 +153,12 @@ def delete_word(request, word_id):
     word = get_object_or_404(Word, id=word_id)
 
     if request.method == 'POST':
+        word_name = word.russian_word
         word.delete()
+        messages.success(
+            request,
+            f'"{word_name}" was deleted from your vocabulary.'
+        )
         return redirect('word_list')
 
     return render(request, 'vocab/delete_word.html', {'word': word})
@@ -157,6 +187,7 @@ def practice_word(request):
             request.session.pop('practice_score', None)
             request.session.pop('practice_difficulty', None)
             return redirect('practice_word')
+
         practice_word_ids = request.session.get('practice_word_ids', [])
         practice_index = request.session.get('practice_index', 0)
         practice_score = request.session.get('practice_score', 0)
@@ -263,7 +294,6 @@ def practice_word(request):
         wrong_words[1].translation,
     ]
     random.shuffle(options)
-
 
     context = {
         'current_word': current_word,

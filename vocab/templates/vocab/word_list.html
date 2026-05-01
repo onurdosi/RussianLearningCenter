@@ -22,9 +22,7 @@
         </p>
 
         <button type="submit">Apply</button>
-        <form action="{% url 'word_list' %}" method="get" style="display: inline;">
-            <button type="submit">Clear</button>
-        </form>
+        <a href="{% url 'word_list' %}" class="button-link">Clear</a>
     </form>
 </div>
 
