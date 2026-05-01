@@ -8,7 +8,7 @@
 
         <p>
             <label><strong>Search:</strong></label>
-            <input type="text" name="search" value="{{ search_query }}">
+            <input type="text" name="search" value="{{ search_query }}" placeholder="Search Russian word or translation">
         </p>
 
         <p>
@@ -22,8 +22,13 @@
         </p>
 
         <button type="submit">Apply</button>
+        <form action="{% url 'word_list' %}" method="get" style="display: inline;">
+            <button type="submit">Clear</button>
+        </form>
     </form>
 </div>
+
+<p><strong>Results found:</strong> {{ result_count }}</p>
 
 {% for word in words %}
     <div class="word-card">
@@ -35,12 +40,17 @@
             <p><strong>Notes:</strong> {{ word.notes }}</p>
         {% endif %}
 
-        <a href="{% url 'edit_word' word.id %}" class="button-link">Edit</a>
-        <a href="{% url 'delete_word' word.id %}" class="button-link">Delete</a>
+        <form action="{% url 'edit_word' word.id %}" method="get" style="display: inline;">
+            <button type="submit">Edit</button>
+        </form>
+
+        <form action="{% url 'delete_word' word.id %}" method="get" style="display: inline;">
+            <button type="submit">Delete</button>
+        </form>
     </div>
 {% endfor %}
 
 {% if not words %}
-    <p>No results found.</p>
+    <p>No results found. Try changing your search or filter.</p>
 {% endif %}
 {% endblock %}

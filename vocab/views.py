@@ -40,10 +40,13 @@ def word_list(request):
             translation__icontains=search_query
         )
 
+    result_count = words.count()
+
     context = {
         'words': words,
         'selected_difficulty': selected_difficulty,
         'search_query': search_query,
+        'result_count': result_count,
     }
 
     return render(request, 'vocab/word_list.html', context)

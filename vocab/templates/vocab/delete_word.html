@@ -13,10 +13,13 @@
             <p><strong>Notes:</strong> {{ word.notes }}</p>
         {% endif %}
 
-        <form method="post">
+        <form method="post" style="display: inline;">
             {% csrf_token %}
             <button type="submit">Yes, delete</button>
-            <a href="{% url 'word_list' %}" class="button-link">Cancel</a>
+        </form>
+
+        <form action="{% url 'word_list' %}" method="get" style="display: inline;">
+            <button type="submit">Cancel</button>
         </form>
     </div>
 {% endblock %}
