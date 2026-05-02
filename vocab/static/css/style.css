@@ -136,3 +136,13 @@ label {
     border-radius: 8px;
     margin-bottom: 20px;
 }
+
+.result-correct {
+    color: #2e7d32; /* clean green */
+    font-weight: bold;
+}
+
+.result-wrong {
+    color: #c62828; /* clean red */
+    font-weight: bold;
+}

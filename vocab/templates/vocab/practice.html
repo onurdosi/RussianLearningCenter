@@ -47,9 +47,9 @@
 
         {% if result %}
             {% if result == 'correct' %}
-                <p><strong>Correct!</strong></p>
+                <p class="result-correct"><strong>Correct!</strong></p>
             {% else %}
-                <p><strong>Wrong.</strong></p>
+                <p class="result-wrong"><strong>Wrong.</strong></p>
                 <p><strong>Correct answer:</strong> {{ correct_answer }}</p>
 
                 {% if current_word.notes %}
