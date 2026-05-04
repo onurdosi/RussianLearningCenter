@@ -36,7 +36,7 @@
 </div>
 
 {% if selected_difficulty %}
-    <h3>{{ selected_difficulty|title }} Words</h3>
+    <h3>{{ selected_difficulty|title }} Words ({{ selected_count }})</h3>
 
     <div class="word-grid">
         {% for word in selected_words %}

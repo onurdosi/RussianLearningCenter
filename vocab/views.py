@@ -40,10 +40,12 @@ def word_list(request):
 
     selected_words = []
     other_words = words
+    selected_count = 0
 
     if selected_difficulty in ['easy', 'medium', 'hard']:
         selected_words = words.filter(difficulty=selected_difficulty)
         other_words = words.exclude(difficulty=selected_difficulty)
+        selected_count = selected_words.count()
     else:
         selected_difficulty = ''
 
@@ -54,6 +56,7 @@ def word_list(request):
         'selected_difficulty': selected_difficulty,
         'search_query': search_query,
         'result_count': result_count,
+        'selected_count': selected_count,
     }
 
     return render(request, 'vocab/word_list.html', context)
