@@ -180,43 +180,46 @@ label {
     display: flex;
     flex-wrap: wrap;
     gap: 12px;
-    align-items: flex-start;
     margin-top: 20px;
     margin-bottom: 30px;
 }
 
 .word-tile {
     min-width: 130px;
-    max-width: 260px;
+    max-width: 240px;
+    min-height: 48px;
     background-color: #fafafa;
+    color: #1f2d3d !important;
     border: 1px solid #ddd;
     border-radius: 10px;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-.word-tile summary {
-    list-style: none;
-    cursor: pointer;
-    padding: 14px 18px;
-    text-align: center;
+    padding: 12px 18px;
     font-weight: bold;
-    color: #1f2d3d;
+    box-sizing: border-box;
+    box-shadow: none;
 }
 
-.word-tile summary::-webkit-details-marker {
+.word-tile:hover {
+    background-color: #eef4ff;
+    color: #1f2d3d !important;
+}
+
+.selected-word {
+    background-color: #eef4ff;
+    border-color: #1565c0;
+}
+
+.word-detail-panel {
+    border: 1px solid #d6e4ff;
+    border-radius: 10px;
+    background-color: #eef4ff;
+    padding: 20px;
+    margin: 20px 0;
+}
+
+.word-detail-panel h3 {
+    margin-top: 0;
+}
+
+.hidden {
     display: none;
-}
-
-.word-tile[open] {
-    min-width: 260px;
-}
-
-.word-details {
-    border-top: 1px solid #ddd;
-    padding: 14px 18px 18px;
-}
-
-.word-details p {
-    margin: 8px 0;
 }
