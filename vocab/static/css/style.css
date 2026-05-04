@@ -146,3 +146,32 @@ label {
     color: #c62828; /* clean red */
     font-weight: bold;
 }
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.stat-card {
+    background-color: #eef4ff;
+    border: 1px solid #d6e4ff;
+    border-radius: 10px;
+    padding: 18px;
+    text-align: center;
+}
+
+.stat-number {
+    display: block;
+    font-size: 28px;
+    font-weight: bold;
+    color: #1565c0;
+}
+
+.stat-label {
+    display: block;
+    margin-top: 6px;
+    color: #2c3e50;
+    font-weight: bold;
+}

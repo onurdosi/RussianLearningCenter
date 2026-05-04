@@ -7,14 +7,28 @@
         track difficulty, and add personal notes for better context.
     </p>
 
-    <div class="stats-box">
-        <h3>Statistics</h3>
-        <ul>
-            <li>Total words: {{ total_words }}</li>
-            <li>Easy words: {{ easy_words }}</li>
-            <li>Medium words: {{ medium_words }}</li>
-            <li>Hard words: {{ hard_words_count }}</li>
-        </ul>
+    <h3>Vocabulary Statistics</h3>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <span class="stat-number">{{ total_words }}</span>
+            <span class="stat-label">Total Words</span>
+        </div>
+
+        <div class="stat-card">
+            <span class="stat-number">{{ easy_words }}</span>
+            <span class="stat-label">Easy</span>
+        </div>
+
+        <div class="stat-card">
+            <span class="stat-number">{{ medium_words }}</span>
+            <span class="stat-label">Medium</span>
+        </div>
+
+        <div class="stat-card">
+            <span class="stat-number">{{ hard_words_count }}</span>
+            <span class="stat-label">Hard</span>
+        </div>
     </div>
 
     <h3>What you can do</h3>
