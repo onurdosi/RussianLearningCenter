@@ -7,12 +7,12 @@
     <form method="get">
         <p>
             <label><strong>Search:</strong></label>
-            <input id="search-box" type="text" name="search" value="{{ search_query }}" placeholder="Search Russian word or translation">
+            <input type="text" name="search" value="{{ search_query }}" placeholder="Search Russian word or translation">
         </p>
 
         <p>
-            <label><strong>Filter by difficulty:</strong></label>
-            <select name="difficulty" onchange="clearSearchAndSubmit(this.form)">
+            <label><strong>Bring difficulty to top:</strong></label>
+            <select name="difficulty">
                 <option value="">All</option>
                 <option value="easy" {% if selected_difficulty == 'easy' %}selected{% endif %}>Easy</option>
                 <option value="medium" {% if selected_difficulty == 'medium' %}selected{% endif %}>Medium</option>
@@ -20,42 +20,82 @@
             </select>
         </p>
 
-        <button type="submit">Search</button>
+        <button type="submit">Apply</button>
         <a href="{% url 'word_list' %}" class="button-link">Clear</a>
     </form>
 </div>
 
 <p><strong>Results found:</strong> {{ result_count }}</p>
 
-{% for word in words %}
-    <div class="word-card">
-        <p><strong>Russian word:</strong> {{ word.russian_word }}</p>
-        <p><strong>Translation:</strong> {{ word.translation }}</p>
-        <p><strong>Difficulty:</strong> {{ word.get_difficulty_display }}</p>
+{% if selected_difficulty %}
+    <h3>{{ selected_difficulty|title }} Words</h3>
 
-        {% if word.notes %}
-            <p><strong>Notes:</strong> {{ word.notes }}</p>
-        {% endif %}
+    <div class="word-grid">
+        {% for word in selected_words %}
+            <details class="word-tile">
+                <summary>{{ word.russian_word }}</summary>
 
-        <form action="{% url 'edit_word' word.id %}" method="get" style="display: inline;">
-            <button type="submit">Edit</button>
-        </form>
+                <div class="word-details">
+                    <p><strong>Translation:</strong> {{ word.translation }}</p>
+                    <p><strong>Difficulty:</strong> {{ word.get_difficulty_display }}</p>
 
-        <form action="{% url 'delete_word' word.id %}" method="get" style="display: inline;">
-            <button type="submit">Delete</button>
-        </form>
+                    {% if word.notes %}
+                        <p><strong>Notes:</strong> {{ word.notes }}</p>
+                    {% endif %}
+
+                    <a href="{% url 'edit_word' word.id %}" class="button-link">Edit</a>
+                    <a href="{% url 'delete_word' word.id %}" class="button-link">Delete</a>
+                </div>
+            </details>
+        {% empty %}
+            <p>No words found for this difficulty.</p>
+        {% endfor %}
     </div>
-{% endfor %}
 
-{% if not words %}
-    <p>No results found. Try changing your search or filter.</p>
+    <h3>Other Words</h3>
+
+    <div class="word-grid">
+        {% for word in other_words %}
+            <details class="word-tile">
+                <summary>{{ word.russian_word }}</summary>
+
+                <div class="word-details">
+                    <p><strong>Translation:</strong> {{ word.translation }}</p>
+                    <p><strong>Difficulty:</strong> {{ word.get_difficulty_display }}</p>
+
+                    {% if word.notes %}
+                        <p><strong>Notes:</strong> {{ word.notes }}</p>
+                    {% endif %}
+
+                    <a href="{% url 'edit_word' word.id %}" class="button-link">Edit</a>
+                    <a href="{% url 'delete_word' word.id %}" class="button-link">Delete</a>
+                </div>
+            </details>
+        {% empty %}
+            <p>No other words found.</p>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="word-grid">
+        {% for word in words %}
+            <details class="word-tile">
+                <summary>{{ word.russian_word }}</summary>
+
+                <div class="word-details">
+                    <p><strong>Translation:</strong> {{ word.translation }}</p>
+                    <p><strong>Difficulty:</strong> {{ word.get_difficulty_display }}</p>
+
+                    {% if word.notes %}
+                        <p><strong>Notes:</strong> {{ word.notes }}</p>
+                    {% endif %}
+
+                    <a href="{% url 'edit_word' word.id %}" class="button-link">Edit</a>
+                    <a href="{% url 'delete_word' word.id %}" class="button-link">Delete</a>
+                </div>
+            </details>
+        {% empty %}
+            <p>No results found. Try changing your search.</p>
+        {% endfor %}
+    </div>
 {% endif %}
-
-<script>
-    function clearSearchAndSubmit(form) {
-        const searchBox = document.getElementById('search-box');
-        searchBox.value = '';
-        form.submit();
-    }
-</script>
 {% endblock %}

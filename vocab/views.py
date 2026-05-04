@@ -30,11 +30,6 @@ def word_list(request):
 
     words = Word.objects.all()
 
-    if selected_difficulty in ['easy', 'medium', 'hard']:
-        words = words.filter(difficulty=selected_difficulty)
-    else:
-        selected_difficulty = ''
-
     if search_query:
         words = words.filter(
             Q(russian_word__icontains=search_query) |
@@ -43,15 +38,25 @@ def word_list(request):
 
     result_count = words.count()
 
+    selected_words = []
+    other_words = words
+
+    if selected_difficulty in ['easy', 'medium', 'hard']:
+        selected_words = words.filter(difficulty=selected_difficulty)
+        other_words = words.exclude(difficulty=selected_difficulty)
+    else:
+        selected_difficulty = ''
+
     context = {
         'words': words,
+        'selected_words': selected_words,
+        'other_words': other_words,
         'selected_difficulty': selected_difficulty,
         'search_query': search_query,
         'result_count': result_count,
     }
 
     return render(request, 'vocab/word_list.html', context)
-
 
 def add_word(request):
     if request.method == 'POST':
