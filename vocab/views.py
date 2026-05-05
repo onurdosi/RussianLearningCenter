@@ -171,16 +171,20 @@ def delete_word(request, word_id):
 
     return render(request, 'vocab/delete_word.html', {'word': word})
 
-
 def practice_word(request):
     difficulty = request.GET.get('difficulty')
     restart = request.GET.get('restart')
+    max_questions = 10
 
-    if restart:
+    def reset_practice_session():
         request.session.pop('practice_word_ids', None)
         request.session.pop('practice_index', None)
         request.session.pop('practice_score', None)
         request.session.pop('practice_difficulty', None)
+        request.session.pop('used_correct_answers', None)
+
+    if restart:
+        reset_practice_session()
         return redirect('practice_word')
 
     if request.method == 'POST':
@@ -190,16 +194,14 @@ def practice_word(request):
         try:
             current_word = Word.objects.get(id=word_id)
         except Word.DoesNotExist:
-            request.session.pop('practice_word_ids', None)
-            request.session.pop('practice_index', None)
-            request.session.pop('practice_score', None)
-            request.session.pop('practice_difficulty', None)
+            reset_practice_session()
             return redirect('practice_word')
 
         practice_word_ids = request.session.get('practice_word_ids', [])
         practice_index = request.session.get('practice_index', 0)
         practice_score = request.session.get('practice_score', 0)
         practice_difficulty = request.session.get('practice_difficulty', 'any')
+        used_correct_answers = request.session.get('used_correct_answers', [])
 
         if selected_answer == current_word.translation:
             result = 'correct'
@@ -208,6 +210,8 @@ def practice_word(request):
         else:
             result = 'wrong'
 
+        used_correct_answers.append(current_word.translation)
+        request.session['used_correct_answers'] = used_correct_answers
         request.session['practice_index'] = practice_index + 1
 
         total_words = len(practice_word_ids)
@@ -241,15 +245,21 @@ def practice_word(request):
             })
 
         random.shuffle(words)
-        request.session['practice_word_ids'] = [word.id for word in words]
+        selected_words = words[:max_questions]
+
+        request.session['practice_word_ids'] = [
+            word.id for word in selected_words
+        ]
         request.session['practice_index'] = 0
         request.session['practice_score'] = 0
         request.session['practice_difficulty'] = selected_difficulty
+        request.session['used_correct_answers'] = []
 
     practice_word_ids = request.session.get('practice_word_ids')
     practice_index = request.session.get('practice_index', 0)
     practice_score = request.session.get('practice_score', 0)
     selected_difficulty = request.session.get('practice_difficulty')
+    used_correct_answers = request.session.get('used_correct_answers', [])
 
     if not practice_word_ids:
         return render(request, 'vocab/practice.html', {
@@ -272,15 +282,10 @@ def practice_word(request):
     try:
         current_word = Word.objects.get(id=current_word_id)
     except Word.DoesNotExist:
-        request.session.pop('practice_word_ids', None)
-        request.session.pop('practice_index', None)
-        request.session.pop('practice_score', None)
-        request.session.pop('practice_difficulty', None)
+        reset_practice_session()
         return redirect('practice_word')
 
-    available_wrong_words = list(
-        Word.objects.exclude(id=current_word.id)
-    )
+    available_wrong_words = list(Word.objects.exclude(id=current_word.id))
 
     if selected_difficulty in ['easy', 'medium', 'hard']:
         available_wrong_words = [
@@ -288,13 +293,20 @@ def practice_word(request):
             if word.difficulty == selected_difficulty
         ]
 
-    if len(available_wrong_words) < 2:
+    preferred_wrong_words = [
+        word for word in available_wrong_words
+        if word.translation not in used_correct_answers
+    ]
+
+    if len(preferred_wrong_words) >= 2:
+        wrong_words = random.sample(preferred_wrong_words, 2)
+    elif len(available_wrong_words) >= 2:
+        wrong_words = random.sample(available_wrong_words, 2)
+    else:
         return render(request, 'vocab/practice.html', {
             'not_enough_words': True,
             'selected_difficulty': selected_difficulty,
         })
-
-    wrong_words = random.sample(available_wrong_words, 2)
 
     options = [
         current_word.translation,
