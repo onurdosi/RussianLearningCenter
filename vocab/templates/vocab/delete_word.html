@@ -15,11 +15,15 @@
 
         <form method="post" style="display: inline;">
             {% csrf_token %}
-            <button type="submit">Yes, delete</button>
+            <button type="submit" class="button-danger">
+                ✖&nbsp;&nbsp;Yes, delete
+            </button>
         </form>
 
         <form action="{% url 'word_list' %}" method="get" style="display: inline;">
-            <button type="submit">Cancel</button>
+            <button type="submit">
+                ↩&nbsp;&nbsp;Cancel
+            </button>
         </form>
     </div>
 {% endblock %}

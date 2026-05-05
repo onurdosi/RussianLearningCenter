@@ -59,15 +59,15 @@ a.button-link {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-height: 40px;
-    padding: 9px 16px;
+    min-height: 44px;
+    padding: 11px 20px;
     background-color: #1565c0;
     color: white !important;
     border: none;
     border-radius: 6px;
     cursor: pointer;
     font-family: Arial, sans-serif;
-    font-size: 16px;
+    font-size: 17px;
     line-height: 1;
     box-sizing: border-box;
     text-decoration: none !important;
@@ -222,4 +222,25 @@ label {
 
 .hidden {
     display: none;
+}
+
+.button-edit {
+    background-color: #455a64;
+}
+
+.button-edit:hover {
+    background-color: #263238;
+}
+
+.button-danger {
+    background-color: #b71c1c;
+}
+
+.button-danger:hover {
+    background-color: #7f0000;
+}
+
+.button-icon {
+    font-size: 17px;
+    margin-right: 14px;
 }
