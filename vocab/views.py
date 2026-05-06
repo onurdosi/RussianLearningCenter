@@ -61,6 +61,7 @@ def word_list(request):
 
     return render(request, 'vocab/word_list.html', context)
 
+
 def add_word(request):
     if request.method == 'POST':
         form = WordForm(request.POST)
@@ -171,6 +172,7 @@ def delete_word(request, word_id):
 
     return render(request, 'vocab/delete_word.html', {'word': word})
 
+
 def practice_word(request):
     difficulty = request.GET.get('difficulty')
     restart = request.GET.get('restart')
@@ -182,6 +184,7 @@ def practice_word(request):
         request.session.pop('practice_score', None)
         request.session.pop('practice_difficulty', None)
         request.session.pop('used_correct_answers', None)
+        request.session.pop('wrong_word_ids', None)
 
     if restart:
         reset_practice_session()
@@ -202,6 +205,7 @@ def practice_word(request):
         practice_score = request.session.get('practice_score', 0)
         practice_difficulty = request.session.get('practice_difficulty', 'any')
         used_correct_answers = request.session.get('used_correct_answers', [])
+        wrong_word_ids = request.session.get('wrong_word_ids', [])
 
         if selected_answer == current_word.translation:
             result = 'correct'
@@ -209,6 +213,9 @@ def practice_word(request):
             request.session['practice_score'] = practice_score
         else:
             result = 'wrong'
+            if current_word.id not in wrong_word_ids:
+                wrong_word_ids.append(current_word.id)
+            request.session['wrong_word_ids'] = wrong_word_ids
 
         used_correct_answers.append(current_word.translation)
         request.session['used_correct_answers'] = used_correct_answers
@@ -254,6 +261,7 @@ def practice_word(request):
         request.session['practice_score'] = 0
         request.session['practice_difficulty'] = selected_difficulty
         request.session['used_correct_answers'] = []
+        request.session['wrong_word_ids'] = []
 
     practice_word_ids = request.session.get('practice_word_ids')
     practice_index = request.session.get('practice_index', 0)
@@ -270,11 +278,15 @@ def practice_word(request):
     total_words = len(practice_word_ids)
 
     if practice_index >= total_words:
+        wrong_word_ids = request.session.get('wrong_word_ids', [])
+        wrong_words = Word.objects.filter(id__in=wrong_word_ids)
+
         return render(request, 'vocab/practice.html', {
             'practice_complete': True,
             'score': practice_score,
             'total_words': total_words,
             'selected_difficulty': selected_difficulty,
+            'wrong_words': wrong_words,
         })
 
     current_word_id = practice_word_ids[practice_index]

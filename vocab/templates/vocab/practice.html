@@ -29,6 +29,24 @@
     <div class="word-card">
         <h3>Practice complete</h3>
         <p><strong>Final score:</strong> {{ score }}/{{ total_words }}</p>
+
+        {% if wrong_words %}
+            <h3>Words to Review</h3>
+
+            {% for word in wrong_words %}
+                <div class="word-card">
+                    <p><strong>Russian word:</strong> {{ word.russian_word }}</p>
+                    <p><strong>Translation:</strong> {{ word.translation }}</p>
+
+                    {% if word.notes %}
+                        <p><strong>Notes:</strong> {{ word.notes }}</p>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% else %}
+            <p><strong>Great job!</strong> You answered every word correctly.</p>
+        {% endif %}
+
         <a href="{% url 'practice_word' %}?restart=1" class="button-link">Play Again</a>
     </div>
 
