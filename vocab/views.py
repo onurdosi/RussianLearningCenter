@@ -8,6 +8,18 @@ from .forms import QuickAddForm, WordForm
 from .models import Word
 
 
+def get_language(request):
+    return request.session.get('language', 'en')
+
+
+def set_language(request, language):
+    if language in ['en', 'ru']:
+        request.session['language'] = language
+
+    next_url = request.GET.get('next') or 'home'
+    return redirect(next_url)
+
+
 def home(request):
     total_words = Word.objects.count()
     easy_words = Word.objects.filter(difficulty='easy').count()
@@ -15,6 +27,7 @@ def home(request):
     hard_words_count = Word.objects.filter(difficulty='hard').count()
 
     context = {
+        'language': get_language(request),
         'total_words': total_words,
         'easy_words': easy_words,
         'medium_words': medium_words,
@@ -50,6 +63,7 @@ def word_list(request):
         selected_difficulty = ''
 
     context = {
+        'language': get_language(request),
         'words': words,
         'selected_words': selected_words,
         'other_words': other_words,
@@ -63,25 +77,38 @@ def word_list(request):
 
 
 def add_word(request):
+    language = get_language(request)
+
     if request.method == 'POST':
         form = WordForm(request.POST)
         if form.is_valid():
             word = form.save()
-            messages.success(
-                request,
-                f'"{word.russian_word}" was added to your vocabulary.'
-            )
+            if language == 'ru':
+                messages.success(
+                    request,
+                    f'"{word.russian_word}" добавлено в словарь.'
+                )
+            else:
+                messages.success(
+                    request,
+                    f'"{word.russian_word}" was added to your vocabulary.'
+                )
             return redirect('word_list')
     else:
         form = WordForm()
 
+    title = 'Добавить слово' if language == 'ru' else 'Add Word'
+
     return render(request, 'vocab/word_form.html', {
+        'language': language,
         'form': form,
-        'title': 'Add Word',
+        'title': title,
     })
 
 
 def quick_add_words(request):
+    language = get_language(request)
+
     if request.method == 'POST':
         form = QuickAddForm(request.POST)
         if form.is_valid():
@@ -117,63 +144,97 @@ def quick_add_words(request):
                 added_count += 1
 
             if added_count > 0:
-                messages.success(
-                    request,
-                    f'{added_count} word(s) added successfully.'
-                )
+                if language == 'ru':
+                    messages.success(
+                        request,
+                        f'{added_count} слов(а) успешно добавлено.'
+                    )
+                else:
+                    messages.success(
+                        request,
+                        f'{added_count} word(s) added successfully.'
+                    )
 
             if skipped_count > 0:
-                messages.info(
-                    request,
-                    f'{skipped_count} duplicate word(s) were skipped.'
-                )
+                if language == 'ru':
+                    messages.info(
+                        request,
+                        f'{skipped_count} повторяющихся слов(а) пропущено.'
+                    )
+                else:
+                    messages.info(
+                        request,
+                        f'{skipped_count} duplicate word(s) were skipped.'
+                    )
 
             return redirect('word_list')
     else:
         form = QuickAddForm()
 
     return render(request, 'vocab/quick_add.html', {
+        'language': language,
         'form': form,
     })
 
 
 def edit_word(request, word_id):
+    language = get_language(request)
     word = get_object_or_404(Word, id=word_id)
 
     if request.method == 'POST':
         form = WordForm(request.POST, instance=word)
         if form.is_valid():
             updated_word = form.save()
-            messages.success(
-                request,
-                f'"{updated_word.russian_word}" was updated successfully.'
-            )
+            if language == 'ru':
+                messages.success(
+                    request,
+                    f'"{updated_word.russian_word}" успешно обновлено.'
+                )
+            else:
+                messages.success(
+                    request,
+                    f'"{updated_word.russian_word}" was updated successfully.'
+                )
             return redirect('word_list')
     else:
         form = WordForm(instance=word)
 
+    title = 'Редактировать слово' if language == 'ru' else 'Edit Word'
+
     return render(request, 'vocab/word_form.html', {
+        'language': language,
         'form': form,
-        'title': 'Edit Word',
+        'title': title,
     })
 
 
 def delete_word(request, word_id):
+    language = get_language(request)
     word = get_object_or_404(Word, id=word_id)
 
     if request.method == 'POST':
         word_name = word.russian_word
         word.delete()
-        messages.success(
-            request,
-            f'"{word_name}" was deleted from your vocabulary.'
-        )
+        if language == 'ru':
+            messages.success(
+                request,
+                f'"{word_name}" удалено из словаря.'
+            )
+        else:
+            messages.success(
+                request,
+                f'"{word_name}" was deleted from your vocabulary.'
+            )
         return redirect('word_list')
 
-    return render(request, 'vocab/delete_word.html', {'word': word})
+    return render(request, 'vocab/delete_word.html', {
+        'language': language,
+        'word': word,
+    })
 
 
 def practice_word(request):
+    language = get_language(request)
     difficulty = request.GET.get('difficulty')
     restart = request.GET.get('restart')
     max_questions = 10
@@ -207,7 +268,13 @@ def practice_word(request):
         used_correct_answers = request.session.get('used_correct_answers', [])
         wrong_word_ids = request.session.get('wrong_word_ids', [])
 
-        if selected_answer == current_word.translation:
+        correct_answer = (
+            current_word.russian_word
+            if language == 'ru'
+            else current_word.translation
+        )
+
+        if selected_answer == correct_answer:
             result = 'correct'
             practice_score += 1
             request.session['practice_score'] = practice_score
@@ -217,17 +284,18 @@ def practice_word(request):
                 wrong_word_ids.append(current_word.id)
             request.session['wrong_word_ids'] = wrong_word_ids
 
-        used_correct_answers.append(current_word.translation)
+        used_correct_answers.append(correct_answer)
         request.session['used_correct_answers'] = used_correct_answers
         request.session['practice_index'] = practice_index + 1
 
         total_words = len(practice_word_ids)
 
         context = {
+            'language': language,
             'current_word': current_word,
             'result': result,
             'selected_answer': selected_answer,
-            'correct_answer': current_word.translation,
+            'correct_answer': correct_answer,
             'not_enough_words': False,
             'practice_complete': False,
             'total_words': total_words,
@@ -247,6 +315,7 @@ def practice_word(request):
 
         if len(words) < 3:
             return render(request, 'vocab/practice.html', {
+                'language': language,
                 'not_enough_words': True,
                 'selected_difficulty': selected_difficulty,
             })
@@ -271,6 +340,7 @@ def practice_word(request):
 
     if not practice_word_ids:
         return render(request, 'vocab/practice.html', {
+            'language': language,
             'choose_difficulty': True,
             'selected_difficulty': 'any',
         })
@@ -282,6 +352,7 @@ def practice_word(request):
         wrong_words = Word.objects.filter(id__in=wrong_word_ids)
 
         return render(request, 'vocab/practice.html', {
+            'language': language,
             'practice_complete': True,
             'score': practice_score,
             'total_words': total_words,
@@ -305,10 +376,16 @@ def practice_word(request):
             if word.difficulty == selected_difficulty
         ]
 
-    preferred_wrong_words = [
-        word for word in available_wrong_words
-        if word.translation not in used_correct_answers
-    ]
+    if language == 'ru':
+        preferred_wrong_words = [
+            word for word in available_wrong_words
+            if word.russian_word not in used_correct_answers
+        ]
+    else:
+        preferred_wrong_words = [
+            word for word in available_wrong_words
+            if word.translation not in used_correct_answers
+        ]
 
     if len(preferred_wrong_words) >= 2:
         wrong_words = random.sample(preferred_wrong_words, 2)
@@ -316,23 +393,37 @@ def practice_word(request):
         wrong_words = random.sample(available_wrong_words, 2)
     else:
         return render(request, 'vocab/practice.html', {
+            'language': language,
             'not_enough_words': True,
             'selected_difficulty': selected_difficulty,
         })
 
-    options = [
-        current_word.translation,
-        wrong_words[0].translation,
-        wrong_words[1].translation,
-    ]
+    if language == 'ru':
+        options = [
+            current_word.russian_word,
+            wrong_words[0].russian_word,
+            wrong_words[1].russian_word,
+        ]
+    else:
+        options = [
+            current_word.translation,
+            wrong_words[0].translation,
+            wrong_words[1].translation,
+        ]
+
     random.shuffle(options)
 
     context = {
+        'language': language,
         'current_word': current_word,
         'options': options,
         'result': None,
         'selected_answer': None,
-        'correct_answer': current_word.translation,
+        'correct_answer': (
+            current_word.russian_word
+            if language == 'ru'
+            else current_word.translation
+        ),
         'not_enough_words': False,
         'practice_complete': False,
         'total_words': total_words,

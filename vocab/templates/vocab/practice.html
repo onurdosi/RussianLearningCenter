@@ -1,84 +1,143 @@
 {% extends 'vocab/base.html' %}
 
 {% block content %}
-<h2>Practice Mode</h2>
+<h2>{% if language == 'ru' %}Практика{% else %}Practice Mode{% endif %}</h2>
 
 {% if choose_difficulty %}
     <div class="word-card">
         <form method="get">
             <p>
-                <label for="difficulty"><strong>Choose difficulty:</strong></label>
+                <label for="difficulty">
+                    <strong>
+                        {% if language == 'ru' %}Выберите сложность:{% else %}Choose difficulty:{% endif %}
+                    </strong>
+                </label>
             </p>
             <select name="difficulty" id="difficulty">
-                <option value="any">Any</option>
-                <option value="easy">Easy</option>
-                <option value="medium">Medium</option>
-                <option value="hard">Hard</option>
+                <option value="any">{% if language == 'ru' %}Любая{% else %}Any{% endif %}</option>
+                <option value="easy">{% if language == 'ru' %}Легко{% else %}Easy{% endif %}</option>
+                <option value="medium">{% if language == 'ru' %}Средне{% else %}Medium{% endif %}</option>
+                <option value="hard">{% if language == 'ru' %}Сложно{% else %}Hard{% endif %}</option>
             </select>
-            <button type="submit">Start Practice</button>
+            <button type="submit">
+                {% if language == 'ru' %}Начать практику{% else %}Start Practice{% endif %}
+            </button>
         </form>
     </div>
 
 {% elif not_enough_words %}
     <div class="word-card">
-        <p>You need at least 3 words in the selected difficulty to use practice mode.</p>
-        <a href="{% url 'practice_word' %}" class="button-link">Choose Another Difficulty</a>
+        <p>
+            {% if language == 'ru' %}
+                Нужно минимум 3 слова выбранной сложности, чтобы начать практику.
+            {% else %}
+                You need at least 3 words in the selected difficulty to use practice mode.
+            {% endif %}
+        </p>
+        <a href="{% url 'practice_word' %}" class="button-link">
+            {% if language == 'ru' %}Выбрать другую сложность{% else %}Choose Another Difficulty{% endif %}
+        </a>
     </div>
 
 {% elif practice_complete %}
     <div class="word-card">
-        <h3>Practice complete</h3>
-        <p><strong>Final score:</strong> {{ score }}/{{ total_words }}</p>
+        <h3>{% if language == 'ru' %}Практика завершена{% else %}Practice complete{% endif %}</h3>
+        <p>
+            <strong>{% if language == 'ru' %}Итоговый результат:{% else %}Final score:{% endif %}</strong>
+            {{ score }}/{{ total_words }}
+        </p>
 
         {% if wrong_words %}
-            <h3>Words to Review</h3>
+            <h3>{% if language == 'ru' %}Слова для повторения{% else %}Words to Review{% endif %}</h3>
 
             {% for word in wrong_words %}
                 <div class="word-card">
-                    <p><strong>Russian word:</strong> {{ word.russian_word }}</p>
-                    <p><strong>Translation:</strong> {{ word.translation }}</p>
+                    <p>
+                        <strong>{% if language == 'ru' %}Русское слово:{% else %}Russian word:{% endif %}</strong>
+                        {{ word.russian_word }}
+                    </p>
+                    <p>
+                        <strong>{% if language == 'ru' %}Английский перевод:{% else %}Translation:{% endif %}</strong>
+                        {{ word.translation }}
+                    </p>
 
                     {% if word.notes %}
-                        <p><strong>Notes:</strong> {{ word.notes }}</p>
+                        <p>
+                            <strong>{% if language == 'ru' %}Заметки:{% else %}Notes:{% endif %}</strong>
+                            {{ word.notes }}
+                        </p>
                     {% endif %}
                 </div>
             {% endfor %}
         {% else %}
-            <p><strong>Great job!</strong> You answered every word correctly.</p>
+            <p>
+                <strong>
+                    {% if language == 'ru' %}
+                        Отличная работа!
+                    {% else %}
+                        Great job!
+                    {% endif %}
+                </strong>
+                {% if language == 'ru' %}
+                    Вы ответили правильно на все вопросы.
+                {% else %}
+                    You answered every word correctly.
+                {% endif %}
+            </p>
         {% endif %}
 
-        <a href="{% url 'practice_word' %}?restart=1" class="button-link">Play Again</a>
+        <a href="{% url 'practice_word' %}?restart=1" class="button-link">
+            {% if language == 'ru' %}Играть снова{% else %}Play Again{% endif %}
+        </a>
     </div>
 
 {% else %}
     <div class="word-card">
-        <p><strong>Difficulty:</strong>
+        <p>
+            <strong>{% if language == 'ru' %}Сложность:{% else %}Difficulty:{% endif %}</strong>
             {% if selected_difficulty == 'any' %}
-                Any
+                {% if language == 'ru' %}Любая{% else %}Any{% endif %}
             {% else %}
                 {{ selected_difficulty|title }}
             {% endif %}
         </p>
 
-        <p><strong>Question:</strong> {{ current_number }}/{{ total_words }}</p>
-        <p><strong>Russian word:</strong> {{ current_word.russian_word }}</p>
+        <p>
+            <strong>{% if language == 'ru' %}Вопрос:{% else %}Question:{% endif %}</strong>
+            {{ current_number }}/{{ total_words }}
+        </p>
+
+        {% if language == 'ru' %}
+            <p><strong>Английское слово:</strong> {{ current_word.translation }}</p>
+        {% else %}
+            <p><strong>Russian word:</strong> {{ current_word.russian_word }}</p>
+        {% endif %}
 
         {% if result %}
             {% if result == 'correct' %}
-                <p class="result-correct"><strong>Correct!</strong></p>
+                <p class="result-correct">
+                    <strong>{% if language == 'ru' %}Правильно!{% else %}Correct!{% endif %}</strong>
+                </p>
             {% else %}
-                <p class="result-wrong"><strong>Wrong.</strong></p>
-                <p><strong>Correct answer:</strong> {{ correct_answer }}</p>
+                <p class="result-wrong">
+                    <strong>{% if language == 'ru' %}Неправильно.{% else %}Wrong.{% endif %}</strong>
+                </p>
+                <p>
+                    <strong>{% if language == 'ru' %}Правильный ответ:{% else %}Correct answer:{% endif %}</strong>
+                    {{ correct_answer }}
+                </p>
 
                 {% if current_word.notes %}
                     <details>
-                        <summary>Show Hint</summary>
+                        <summary>{% if language == 'ru' %}Показать подсказку{% else %}Show Hint{% endif %}</summary>
                         <p>{{ current_word.notes }}</p>
                     </details>
                 {% endif %}
             {% endif %}
 
-            <a href="{% url 'practice_word' %}" class="button-link">Next Word</a>
+            <a href="{% url 'practice_word' %}" class="button-link">
+                {% if language == 'ru' %}Следующее слово{% else %}Next Word{% endif %}
+            </a>
         {% else %}
             <form method="post">
                 {% csrf_token %}
@@ -95,7 +154,7 @@
 
             {% if current_word.notes %}
                 <details>
-                    <summary>Show Hint</summary>
+                    <summary>{% if language == 'ru' %}Показать подсказку{% else %}Show Hint{% endif %}</summary>
                     <p>{{ current_word.notes }}</p>
                 </details>
             {% endif %}

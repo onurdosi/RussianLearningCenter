@@ -1,42 +1,71 @@
 {% extends 'vocab/base.html' %}
 
 {% block content %}
-    <h2>Welcome</h2>
-    <p>
-        This is my Russian vocabulary learning app. It helps users save words,
-        track difficulty, and add personal notes for better context.
-    </p>
+    {% if language == 'ru' %}
+        <h2>Добро пожаловать</h2>
+        <p>
+            Это приложение помогает пользователям изучать английские слова,
+            используя русский язык как основу.
+        </p>
 
-    <h3>Vocabulary Statistics</h3>
+        <h3>Статистика словаря</h3>
+    {% else %}
+        <h2>Welcome</h2>
+        <p>
+            This is my Russian vocabulary learning app. It helps users save words,
+            track difficulty, and add personal notes for better context.
+        </p>
+
+        <h3>Vocabulary Statistics</h3>
+    {% endif %}
 
     <div class="stats-grid">
         <div class="stat-card">
             <span class="stat-number">{{ total_words }}</span>
-            <span class="stat-label">Total Words</span>
+            <span class="stat-label">
+                {% if language == 'ru' %}Всего слов{% else %}Total Words{% endif %}
+            </span>
         </div>
 
         <div class="stat-card">
             <span class="stat-number">{{ easy_words }}</span>
-            <span class="stat-label">Easy</span>
+            <span class="stat-label">
+                {% if language == 'ru' %}Легкие{% else %}Easy{% endif %}
+            </span>
         </div>
 
         <div class="stat-card">
             <span class="stat-number">{{ medium_words }}</span>
-            <span class="stat-label">Medium</span>
+            <span class="stat-label">
+                {% if language == 'ru' %}Средние{% else %}Medium{% endif %}
+            </span>
         </div>
 
         <div class="stat-card">
             <span class="stat-number">{{ hard_words_count }}</span>
-            <span class="stat-label">Hard</span>
+            <span class="stat-label">
+                {% if language == 'ru' %}Сложные{% else %}Hard{% endif %}
+            </span>
         </div>
     </div>
 
-    <h3>What you can do</h3>
-    <ul>
-        <li>Save Russian words</li>
-        <li>Add translations</li>
-        <li>Track difficulty</li>
-        <li>Add personal notes</li>
-        <li>Review hard words separately</li>
-    </ul>
+    {% if language == 'ru' %}
+        <h3>Что можно делать</h3>
+        <ul>
+            <li>Сохранять слова</li>
+            <li>Добавлять переводы</li>
+            <li>Выбирать уровень сложности</li>
+            <li>Добавлять личные заметки</li>
+            <li>Практиковать сложные слова отдельно</li>
+        </ul>
+    {% else %}
+        <h3>What you can do</h3>
+        <ul>
+            <li>Save Russian words</li>
+            <li>Add translations</li>
+            <li>Track difficulty</li>
+            <li>Add personal notes</li>
+            <li>Review hard words separately</li>
+        </ul>
+    {% endif %}
 {% endblock %}

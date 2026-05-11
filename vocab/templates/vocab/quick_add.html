@@ -1,15 +1,22 @@
 {% extends 'vocab/base.html' %}
 
 {% block content %}
-<h2>Quick Add Words</h2>
+<h2>{% if language == 'ru' %}Быстрое добавление слов{% else %}Quick Add Words{% endif %}</h2>
 
 <div class="word-card">
     <p>
-        Add multiple words at once by entering Russian words and translations
-        separated by commas.
+        {% if language == 'ru' %}
+            Добавьте несколько слов сразу. Введите русские слова и английские переводы через запятую.
+        {% else %}
+            Add multiple words at once by entering Russian words and translations separated by commas.
+        {% endif %}
     </p>
     <p>
-        The words and translations must be in the same order.
+        {% if language == 'ru' %}
+            Слова и переводы должны быть в одинаковом порядке.
+        {% else %}
+            The words and translations must be in the same order.
+        {% endif %}
     </p>
 </div>
 
@@ -18,23 +25,43 @@
     {{ form.non_field_errors }}
 
     <p>
-        {{ form.russian_words.label_tag }}
+        <label for="{{ form.russian_words.id_for_label }}">
+            {% if language == 'ru' %}Русские слова{% else %}Russian words{% endif %}
+        </label>
         {{ form.russian_words }}
         {{ form.russian_words.errors }}
     </p>
 
     <p>
-        {{ form.translations.label_tag }}
+        <label for="{{ form.translations.id_for_label }}">
+            {% if language == 'ru' %}Английские переводы{% else %}Translations{% endif %}
+        </label>
         {{ form.translations }}
         {{ form.translations.errors }}
     </p>
 
     <p>
-        {{ form.difficulty.label_tag }}
-        {{ form.difficulty }}
+        <label for="id_difficulty">
+            {% if language == 'ru' %}Сложность{% else %}Difficulty{% endif %}
+        </label>
+
+        <select name="difficulty" id="id_difficulty">
+            <option value="easy">
+                {% if language == 'ru' %}Легко{% else %}Easy{% endif %}
+            </option>
+            <option value="medium" selected>
+                {% if language == 'ru' %}Средне{% else %}Medium{% endif %}
+            </option>
+            <option value="hard">
+                {% if language == 'ru' %}Сложно{% else %}Hard{% endif %}
+            </option>
+        </select>
+
         {{ form.difficulty.errors }}
     </p>
 
-    <button type="submit">Save Bulk</button>
+    <button type="submit">
+        {% if language == 'ru' %}Сохранить несколько слов{% else %}Save Bulk{% endif %}
+    </button>
 </form>
 {% endblock %}

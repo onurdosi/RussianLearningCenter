@@ -6,14 +6,33 @@
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body>
+    <div class="language-switcher">
+        <a href="{% url 'set_language' 'en' %}?next={{ request.path }}">ENG</a>
+        <a href="{% url 'set_language' 'ru' %}?next={{ request.path }}">RU</a>
+    </div>
+
     <div class="page">
-        <h1>Russian Learning Center</h1>
+        <h1>
+            {% if language == 'ru' %}
+                Центр изучения языков
+            {% else %}
+                Russian Learning Center
+            {% endif %}
+        </h1>
 
         <div class="nav">
-            <a href="{% url 'home' %}">Home</a>
-            <a href="{% url 'word_list' %}">All Words</a>
-            <a href="{% url 'add_word' %}">Add Word</a>
-            <a href="{% url 'practice_word' %}">Practice</a>
+            <a href="{% url 'home' %}">
+                {% if language == 'ru' %}Главная{% else %}Home{% endif %}
+            </a>
+            <a href="{% url 'word_list' %}">
+                {% if language == 'ru' %}Все слова{% else %}All Words{% endif %}
+            </a>
+            <a href="{% url 'add_word' %}">
+                {% if language == 'ru' %}Добавить слово{% else %}Add Word{% endif %}
+            </a>
+            <a href="{% url 'practice_word' %}">
+                {% if language == 'ru' %}Практика{% else %}Practice{% endif %}
+            </a>
         </div>
 
         <hr>

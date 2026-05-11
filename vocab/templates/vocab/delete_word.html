@@ -1,28 +1,44 @@
 {% extends 'vocab/base.html' %}
 
 {% block content %}
-    <h2>Delete Word</h2>
+    <h2>{% if language == 'ru' %}Удалить слово{% else %}Delete Word{% endif %}</h2>
 
     <div class="word-card">
-        <p>Are you sure you want to delete this word?</p>
+        <p>
+            {% if language == 'ru' %}
+                Вы уверены, что хотите удалить это слово?
+            {% else %}
+                Are you sure you want to delete this word?
+            {% endif %}
+        </p>
 
-        <p><strong>Russian word:</strong> {{ word.russian_word }}</p>
-        <p><strong>Translation:</strong> {{ word.translation }}</p>
+        <p>
+            <strong>{% if language == 'ru' %}Русское слово:{% else %}Russian word:{% endif %}</strong>
+            {{ word.russian_word }}
+        </p>
+
+        <p>
+            <strong>{% if language == 'ru' %}Английский перевод:{% else %}Translation:{% endif %}</strong>
+            {{ word.translation }}
+        </p>
 
         {% if word.notes %}
-            <p><strong>Notes:</strong> {{ word.notes }}</p>
+            <p>
+                <strong>{% if language == 'ru' %}Заметки:{% else %}Notes:{% endif %}</strong>
+                {{ word.notes }}
+            </p>
         {% endif %}
 
         <form method="post" style="display: inline;">
             {% csrf_token %}
             <button type="submit" class="button-danger">
-                ✖&nbsp;&nbsp;Yes, delete
+                ✖&nbsp;&nbsp;{% if language == 'ru' %}Да, удалить{% else %}Yes, delete{% endif %}
             </button>
         </form>
 
         <form action="{% url 'word_list' %}" method="get" style="display: inline;">
             <button type="submit">
-                ↩&nbsp;&nbsp;Cancel
+                ↩&nbsp;&nbsp;{% if language == 'ru' %}Отмена{% else %}Cancel{% endif %}
             </button>
         </form>
     </div>

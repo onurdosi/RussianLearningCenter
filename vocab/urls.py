@@ -3,6 +3,7 @@ from . import views
 
 urlpatterns = [
     path('', views.home, name='home'),
+    path('language/<str:language>/', views.set_language, name='set_language'),
     path('words/', views.word_list, name='word_list'),
     path('add/', views.add_word, name='add_word'),
     path('quick-add/', views.quick_add_words, name='quick_add_words'),

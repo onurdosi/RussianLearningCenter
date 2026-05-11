@@ -243,4 +243,31 @@ label {
 .button-icon {
     font-size: 17px;
     margin-right: 14px;
+
+
+.language-switcher {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    background: white;
+    border: 1px solid #d6e4ff;
+    border-radius: 8px;
+    padding: 8px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+}
+
+.language-switcher a {
+    display: inline-block;
+    padding: 6px 10px;
+    margin: 0 2px;
+    background-color: #1565c0;
+    color: white !important;
+    border-radius: 5px;
+    text-decoration: none !important;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.language-switcher a:hover {
+    background-color: #0d47a1;
 }

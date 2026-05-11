@@ -5,17 +5,69 @@
 
 <form method="post">
     {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Save Word</button>
+
+    <p>
+        <label for="{{ form.russian_word.id_for_label }}">
+            {% if language == 'ru' %}Русское слово{% else %}Russian word{% endif %}
+        </label>
+        {{ form.russian_word }}
+        {{ form.russian_word.errors }}
+    </p>
+
+    <p>
+        <label for="{{ form.translation.id_for_label }}">
+            {% if language == 'ru' %}Английский перевод{% else %}Translation{% endif %}
+        </label>
+        {{ form.translation }}
+        {{ form.translation.errors }}
+    </p>
+
+    <p>
+        <label for="id_difficulty">
+            {% if language == 'ru' %}Сложность{% else %}Difficulty{% endif %}
+        </label>
+
+        <select name="difficulty" id="id_difficulty">
+            <option value="easy" {% if form.difficulty.value == 'easy' %}selected{% endif %}>
+                {% if language == 'ru' %}Легко{% else %}Easy{% endif %}
+            </option>
+            <option value="medium" {% if form.difficulty.value == 'medium' %}selected{% endif %}>
+                {% if language == 'ru' %}Средне{% else %}Medium{% endif %}
+            </option>
+            <option value="hard" {% if form.difficulty.value == 'hard' %}selected{% endif %}>
+                {% if language == 'ru' %}Сложно{% else %}Hard{% endif %}
+            </option>
+        </select>
+
+        {{ form.difficulty.errors }}
+    </p>
+
+    <p>
+        <label for="{{ form.notes.id_for_label }}">
+            {% if language == 'ru' %}Заметки{% else %}Notes{% endif %}
+        </label>
+        {{ form.notes }}
+        {{ form.notes.errors }}
+    </p>
+
+    <button type="submit">
+        {% if language == 'ru' %}Сохранить слово{% else %}Save Word{% endif %}
+    </button>
 </form>
 
-{% if title == 'Add Word' %}
+{% if 'add' in request.path %}
     <div class="word-card">
-        <h3>Add words in bulk</h3>
+        <h3>{% if language == 'ru' %}Добавить несколько слов{% else %}Add words in bulk{% endif %}</h3>
         <p>
-            Need to add several words at once? Use Quick Add
+            {% if language == 'ru' %}
+                Нужно добавить несколько слов сразу? Используйте Быстрое добавление.
+            {% else %}
+                Need to add several words at once? Use Quick Add.
+            {% endif %}
         </p>
-        <a href="{% url 'quick_add_words' %}" class="button-link">Quick Add</a>
+        <a href="{% url 'quick_add_words' %}" class="button-link">
+            {% if language == 'ru' %}Быстрое добавление{% else %}Quick Add{% endif %}
+        </a>
     </div>
 {% endif %}
 {% endblock %}
