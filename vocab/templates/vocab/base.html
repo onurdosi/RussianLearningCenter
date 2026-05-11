@@ -6,37 +6,50 @@
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body>
-    <div class="language-switcher">
-        <a href="{% url 'set_language' 'en' %}?next={{ request.path }}">ENG</a>
-        <a href="{% url 'set_language' 'ru' %}?next={{ request.path }}">RU</a>
-    </div>
-
-    <div class="page">
-        <h1>
-            {% if language == 'ru' %}
-                Центр изучения языков
-            {% else %}
-                Russian Learning Center
-            {% endif %}
-        </h1>
-
-        <div class="nav">
-            <a href="{% url 'home' %}">
-                {% if language == 'ru' %}Главная{% else %}Home{% endif %}
-            </a>
-            <a href="{% url 'word_list' %}">
-                {% if language == 'ru' %}Все слова{% else %}All Words{% endif %}
-            </a>
-            <a href="{% url 'add_word' %}">
-                {% if language == 'ru' %}Добавить слово{% else %}Add Word{% endif %}
-            </a>
-            <a href="{% url 'practice_word' %}">
-                {% if language == 'ru' %}Практика{% else %}Practice{% endif %}
-            </a>
+    <header class="site-header">
+        <div class="brand">
+            <span class="brand-icon">📖</span>
+            <span class="brand-title">
+                {% if language == 'ru' %}
+                    Центр изучения языков
+                {% else %}
+                    Russian Learning Center
+                {% endif %}
+            </span>
         </div>
 
-        <hr>
+        <nav class="main-nav">
+            <a href="{% url 'home' %}">
+                🏠 {% if language == 'ru' %}Главная{% else %}Home{% endif %}
+            </a>
+            <a href="{% url 'word_list' %}">
+                ☰ {% if language == 'ru' %}Все слова{% else %}All Words{% endif %}
+            </a>
+            <a href="{% url 'add_word' %}">
+                ➕ {% if language == 'ru' %}Добавить слово{% else %}Add Word{% endif %}
+            </a>
+            <a href="{% url 'practice_word' %}">
+                🎓 {% if language == 'ru' %}Практика{% else %}Practice{% endif %}
+            </a>
+        </nav>
 
+        <div class="language-switcher">
+            <a
+                href="{% url 'set_language' 'ru' %}?next={{ request.path }}"
+                class="{% if language == 'ru' %}active-language{% endif %}"
+            >
+                RU
+            </a>
+            <a
+                href="{% url 'set_language' 'en' %}?next={{ request.path }}"
+                class="{% if language == 'en' %}active-language{% endif %}"
+            >
+                ENG
+            </a>
+        </div>
+    </header>
+
+    <main class="page">
         {% if messages %}
             {% for message in messages %}
                 <div class="message message-{{ message.tags }}">
@@ -47,6 +60,8 @@
 
         {% block content %}
         {% endblock %}
-    </div>
+    </main>
 </body>
-</html>
+</html>git add .
+
+git commit -m "Redesign navigation layout and improve language switcher UI"

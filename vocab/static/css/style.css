@@ -1,16 +1,91 @@
 body {
     font-family: Arial, sans-serif;
-    background-color: #f0f2f5;
+    background-color: #f4f8ff;
     margin: 0;
+    color: #0f1f3d;
+}
+
+.site-header {
+    height: 74px;
+    background-color: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 34px;
+    box-shadow: 0 2px 14px rgba(0, 0, 0, 0.08);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 260px;
+}
+
+.brand-icon {
+    font-size: 30px;
+}
+
+.brand-title {
+    font-size: 22px;
+    font-weight: bold;
+    color: #0f1f3d;
+}
+
+.main-nav {
+    display: flex;
+    align-items: center;
+    gap: 34px;
+}
+
+.main-nav a {
+    color: #26364f;
+    text-decoration: none !important;
+    font-size: 17px;
+    font-weight: bold;
+    padding: 25px 10px;
+    border-bottom: 4px solid transparent;
+}
+
+.main-nav a:hover {
+    color: #1565c0;
+    border-bottom-color: #1565c0;
+}
+
+.language-switcher {
+    display: flex;
+    align-items: center;
+    border: 1px solid #1565c0;
+    border-radius: 9px;
+    overflow: hidden;
+    background-color: white;
+}
+
+.language-switcher a {
+    padding: 11px 18px;
+    min-width: 42px;
+    text-align: center;
+    color: #1565c0 !important;
+    text-decoration: none !important;
+    font-weight: bold;
+    font-size: 15px;
+}
+
+.language-switcher .active-language {
+    background-color: #1565c0;
+    color: white !important;
 }
 
 .page {
-    max-width: 900px;
+    max-width: 1120px;
     margin: 40px auto;
     background: white;
-    padding: 30px;
+    padding: 42px;
     border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 6px 28px rgba(0, 0, 0, 0.08);
 }
 
 h1 {
@@ -20,26 +95,6 @@ h1 {
 
 h2, h3 {
     color: #2c3e50;
-}
-
-.nav {
-    text-align: center;
-    margin-bottom: 25px;
-}
-
-.nav a {
-    display: inline-block;
-    text-decoration: none !important;
-    margin: 0 8px;
-    padding: 8px 14px;
-    background: #1565c0;
-    color: white !important;
-    border-radius: 6px;
-}
-
-.nav a:hover {
-    background: #0d47a1;
-    text-decoration: none !important;
 }
 
 hr {
@@ -138,12 +193,12 @@ label {
 }
 
 .result-correct {
-    color: #2e7d32; /* clean green */
+    color: #2e7d32;
     font-weight: bold;
 }
 
 .result-wrong {
-    color: #c62828; /* clean red */
+    color: #c62828;
     font-weight: bold;
 }
 
@@ -243,31 +298,4 @@ label {
 .button-icon {
     font-size: 17px;
     margin-right: 14px;
-
-
-.language-switcher {
-    position: fixed;
-    top: 15px;
-    right: 15px;
-    background: white;
-    border: 1px solid #d6e4ff;
-    border-radius: 8px;
-    padding: 8px;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
-}
-
-.language-switcher a {
-    display: inline-block;
-    padding: 6px 10px;
-    margin: 0 2px;
-    background-color: #1565c0;
-    color: white !important;
-    border-radius: 5px;
-    text-decoration: none !important;
-    font-weight: bold;
-    font-size: 14px;
-}
-
-.language-switcher a:hover {
-    background-color: #0d47a1;
 }
