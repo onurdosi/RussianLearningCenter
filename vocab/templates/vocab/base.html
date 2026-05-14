@@ -3,7 +3,9 @@
 <html>
 <head>
     <title>Russian Learning Center</title>
+    {% if not request.path|slice:":6" == "/admin" %}
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% endif %}
 </head>
 <body>
     <header class="site-header">
@@ -52,8 +54,12 @@
             </div>
 
             {% if user.is_authenticated %}
-                <a href="{% url 'change_password' %}" class="button-link password-button">
-                    {% if language == 'ru' %}Пароль{% else %}Password{% endif %}
+                <a
+                    href="{% url 'change_password' %}"
+                    class="account-button"
+                    title="{% if language == 'ru' %}Аккаунт{% else %}Account{% endif %}"
+                >
+                    👤
                 </a>
 
                 <form method="post" action="{% url 'logout' %}">
