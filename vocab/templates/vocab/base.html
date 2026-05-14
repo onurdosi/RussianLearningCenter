@@ -18,34 +18,47 @@
             </span>
         </div>
 
-        <nav class="main-nav">
-            <a href="{% url 'home' %}">
-                🏠 {% if language == 'ru' %}Главная{% else %}Home{% endif %}
-            </a>
-            <a href="{% url 'word_list' %}">
-                ☰ {% if language == 'ru' %}Все слова{% else %}All Words{% endif %}
-            </a>
-            <a href="{% url 'add_word' %}">
-                ➕ {% if language == 'ru' %}Добавить слово{% else %}Add Word{% endif %}
-            </a>
-            <a href="{% url 'practice_word' %}">
-                🎓 {% if language == 'ru' %}Практика{% else %}Practice{% endif %}
-            </a>
-        </nav>
+        {% if user.is_authenticated %}
+            <nav class="main-nav">
+                <a href="{% url 'home' %}">
+                    🏠 {% if language == 'ru' %}Главная{% else %}Home{% endif %}
+                </a>
+                <a href="{% url 'word_list' %}">
+                    ☰ {% if language == 'ru' %}Все слова{% else %}All Words{% endif %}
+                </a>
+                <a href="{% url 'add_word' %}">
+                    ➕ {% if language == 'ru' %}Добавить слово{% else %}Add Word{% endif %}
+                </a>
+                <a href="{% url 'practice_word' %}">
+                    🎓 {% if language == 'ru' %}Практика{% else %}Practice{% endif %}
+                </a>
+            </nav>
+        {% endif %}
 
-        <div class="language-switcher">
-            <a
-                href="{% url 'set_language' 'ru' %}?next={{ request.path }}"
-                class="{% if language == 'ru' %}active-language{% endif %}"
-            >
-                RU
-            </a>
-            <a
-                href="{% url 'set_language' 'en' %}?next={{ request.path }}"
-                class="{% if language == 'en' %}active-language{% endif %}"
-            >
-                ENG
-            </a>
+        <div class="header-actions">
+            <div class="language-switcher">
+                <a
+                    href="{% url 'set_language' 'ru' %}?next={{ request.path }}"
+                    class="{% if language == 'ru' %}active-language{% endif %}"
+                >
+                    RU
+                </a>
+                <a
+                    href="{% url 'set_language' 'en' %}?next={{ request.path }}"
+                    class="{% if language == 'en' %}active-language{% endif %}"
+                >
+                    ENG
+                </a>
+            </div>
+
+            {% if user.is_authenticated %}
+                <form method="post" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="logout-button">
+                        {% if language == 'ru' %}Выйти{% else %}Logout{% endif %}
+                    </button>
+                </form>
+            {% endif %}
         </div>
     </header>
 

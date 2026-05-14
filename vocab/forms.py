@@ -8,11 +8,18 @@ class WordForm(forms.ModelForm):
         model = Word
         fields = ['russian_word', 'translation', 'difficulty', 'notes']
 
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+
     def clean_russian_word(self):
         russian_word = self.cleaned_data['russian_word'].strip()
         normalized_word = russian_word.lower()
 
         existing_words = Word.objects.exclude(pk=self.instance.pk)
+
+        if self.user:
+            existing_words = existing_words.filter(user=self.user)
 
         for word in existing_words:
             if word.russian_word.strip().lower() == normalized_word:

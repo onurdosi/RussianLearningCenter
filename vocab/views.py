@@ -1,6 +1,9 @@
 import random
 
 from django.contrib import messages
+from django.contrib.auth import login
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import UserCreationForm
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 
@@ -20,11 +23,32 @@ def set_language(request, language):
     return redirect(next_url)
 
 
+def signup(request):
+    language = get_language(request)
+
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect('home')
+    else:
+        form = UserCreationForm()
+
+    return render(request, 'vocab/signup.html', {
+        'language': language,
+        'form': form,
+    })
+
+
+@login_required
 def home(request):
-    total_words = Word.objects.count()
-    easy_words = Word.objects.filter(difficulty='easy').count()
-    medium_words = Word.objects.filter(difficulty='medium').count()
-    hard_words_count = Word.objects.filter(difficulty='hard').count()
+    user_words = Word.objects.filter(user=request.user)
+
+    total_words = user_words.count()
+    easy_words = user_words.filter(difficulty='easy').count()
+    medium_words = user_words.filter(difficulty='medium').count()
+    hard_words_count = user_words.filter(difficulty='hard').count()
 
     context = {
         'language': get_language(request),
@@ -37,11 +61,12 @@ def home(request):
     return render(request, 'vocab/home.html', context)
 
 
+@login_required
 def word_list(request):
     selected_difficulty = request.GET.get('difficulty')
     search_query = request.GET.get('search', '').strip()
 
-    words = Word.objects.all()
+    words = Word.objects.filter(user=request.user)
 
     if search_query:
         words = words.filter(
@@ -76,13 +101,17 @@ def word_list(request):
     return render(request, 'vocab/word_list.html', context)
 
 
+@login_required
 def add_word(request):
     language = get_language(request)
 
     if request.method == 'POST':
-        form = WordForm(request.POST)
+        form = WordForm(request.POST, user=request.user)
         if form.is_valid():
-            word = form.save()
+            word = form.save(commit=False)
+            word.user = request.user
+            word.save()
+
             if language == 'ru':
                 messages.success(
                     request,
@@ -95,7 +124,7 @@ def add_word(request):
                 )
             return redirect('word_list')
     else:
-        form = WordForm()
+        form = WordForm(user=request.user)
 
     title = 'Добавить слово' if language == 'ru' else 'Add Word'
 
@@ -106,6 +135,7 @@ def add_word(request):
     })
 
 
+@login_required
 def quick_add_words(request):
     language = get_language(request)
 
@@ -117,7 +147,8 @@ def quick_add_words(request):
             difficulty = form.cleaned_data['difficulty']
 
             existing_words_normalized = {
-                word.russian_word.strip().lower() for word in Word.objects.all()
+                word.russian_word.strip().lower()
+                for word in Word.objects.filter(user=request.user)
             }
 
             words_added_in_this_batch = set()
@@ -135,6 +166,7 @@ def quick_add_words(request):
                     continue
 
                 Word.objects.create(
+                    user=request.user,
                     russian_word=russian_word.strip(),
                     translation=translation.strip(),
                     difficulty=difficulty,
@@ -177,12 +209,13 @@ def quick_add_words(request):
     })
 
 
+@login_required
 def edit_word(request, word_id):
     language = get_language(request)
-    word = get_object_or_404(Word, id=word_id)
+    word = get_object_or_404(Word, id=word_id, user=request.user)
 
     if request.method == 'POST':
-        form = WordForm(request.POST, instance=word)
+        form = WordForm(request.POST, instance=word, user=request.user)
         if form.is_valid():
             updated_word = form.save()
             if language == 'ru':
@@ -197,7 +230,7 @@ def edit_word(request, word_id):
                 )
             return redirect('word_list')
     else:
-        form = WordForm(instance=word)
+        form = WordForm(instance=word, user=request.user)
 
     title = 'Редактировать слово' if language == 'ru' else 'Edit Word'
 
@@ -208,9 +241,10 @@ def edit_word(request, word_id):
     })
 
 
+@login_required
 def delete_word(request, word_id):
     language = get_language(request)
-    word = get_object_or_404(Word, id=word_id)
+    word = get_object_or_404(Word, id=word_id, user=request.user)
 
     if request.method == 'POST':
         word_name = word.russian_word
@@ -233,6 +267,7 @@ def delete_word(request, word_id):
     })
 
 
+@login_required
 def practice_word(request):
     language = get_language(request)
     difficulty = request.GET.get('difficulty')
@@ -256,7 +291,7 @@ def practice_word(request):
         word_id = request.POST.get('word_id')
 
         try:
-            current_word = Word.objects.get(id=word_id)
+            current_word = Word.objects.get(id=word_id, user=request.user)
         except Word.DoesNotExist:
             reset_practice_session()
             return redirect('practice_word')
@@ -307,10 +342,12 @@ def practice_word(request):
 
     if difficulty:
         if difficulty in ['easy', 'medium', 'hard']:
-            words = list(Word.objects.filter(difficulty=difficulty))
+            words = list(
+                Word.objects.filter(user=request.user, difficulty=difficulty)
+            )
             selected_difficulty = difficulty
         else:
-            words = list(Word.objects.all())
+            words = list(Word.objects.filter(user=request.user))
             selected_difficulty = 'any'
 
         if len(words) < 3:
@@ -349,7 +386,10 @@ def practice_word(request):
 
     if practice_index >= total_words:
         wrong_word_ids = request.session.get('wrong_word_ids', [])
-        wrong_words = Word.objects.filter(id__in=wrong_word_ids)
+        wrong_words = Word.objects.filter(
+            user=request.user,
+            id__in=wrong_word_ids
+        )
 
         return render(request, 'vocab/practice.html', {
             'language': language,
@@ -363,12 +403,17 @@ def practice_word(request):
     current_word_id = practice_word_ids[practice_index]
 
     try:
-        current_word = Word.objects.get(id=current_word_id)
+        current_word = Word.objects.get(
+            id=current_word_id,
+            user=request.user
+        )
     except Word.DoesNotExist:
         reset_practice_session()
         return redirect('practice_word')
 
-    available_wrong_words = list(Word.objects.exclude(id=current_word.id))
+    available_wrong_words = list(
+        Word.objects.filter(user=request.user).exclude(id=current_word.id)
+    )
 
     if selected_difficulty in ['easy', 'medium', 'hard']:
         available_wrong_words = [

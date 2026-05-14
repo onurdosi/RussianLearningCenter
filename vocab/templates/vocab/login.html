@@ -1,0 +1,45 @@
+{% extends 'vocab/base.html' %}
+
+{% block content %}
+<h2>{% if language == 'ru' %}Вход{% else %}Login{% endif %}</h2>
+
+<div class="word-card">
+    <form method="post">
+        {% csrf_token %}
+
+        {{ form.non_field_errors }}
+
+        <p>
+            <label for="{{ form.username.id_for_label }}">
+                {% if language == 'ru' %}Имя пользователя{% else %}Username{% endif %}
+            </label>
+            {{ form.username }}
+            {{ form.username.errors }}
+        </p>
+
+        <p>
+            <label for="{{ form.password.id_for_label }}">
+                {% if language == 'ru' %}Пароль{% else %}Password{% endif %}
+            </label>
+            {{ form.password }}
+            {{ form.password.errors }}
+        </p>
+
+        <button type="submit">
+            {% if language == 'ru' %}Войти{% else %}Login{% endif %}
+        </button>
+    </form>
+</div>
+
+<p>
+    {% if language == 'ru' %}
+        Нет аккаунта?
+    {% else %}
+        Do not have an account?
+    {% endif %}
+
+    <a href="{% url 'signup' %}">
+        {% if language == 'ru' %}Создать аккаунт{% else %}Create an account{% endif %}
+    </a>
+</p>
+{% endblock %}
