@@ -15,26 +15,15 @@ class WordFilter(models.Model):
 
 
 class Word(models.Model):
-    DIFFICULTY_CHOICES = [
-        ('easy', 'Easy'),
-        ('medium', 'Medium'),
-        ('hard', 'Hard'),
-    ]
-
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         null=True,
         blank=True
     )
+
     russian_word = models.CharField(max_length=100)
     translation = models.CharField(max_length=100)
-
-    difficulty = models.CharField(
-        max_length=10,
-        choices=DIFFICULTY_CHOICES,
-        default='medium'
-    )
 
     word_filter = models.ForeignKey(
         WordFilter,

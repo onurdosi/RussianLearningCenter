@@ -240,7 +240,6 @@ def quick_add_words(request):
                     user=request.user,
                     russian_word=russian_word.strip(),
                     translation=translation.strip(),
-                    difficulty='medium',
                     word_filter=word_filter,
                     notes='',
                 )
