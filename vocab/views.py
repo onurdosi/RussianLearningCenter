@@ -208,12 +208,14 @@ def quick_add_words(request):
             translations = form.cleaned_data['translations_list']
             word_filter = form.cleaned_data.get('word_filter')
             new_filter_name = form.cleaned_data.get('new_filter_name', '')
+            created_new_filter = False
 
             if new_filter_name:
                 word_filter = WordFilter.objects.create(
                     user=request.user,
                     name=new_filter_name,
                 )
+                created_new_filter = True
 
             existing_words_normalized = {
                 word.russian_word.strip().lower()
@@ -244,6 +246,9 @@ def quick_add_words(request):
                 )
                 words_added_in_this_batch.add(normalized_word)
                 added_count += 1
+
+            if created_new_filter and added_count == 0:
+                word_filter.delete()
 
             if added_count > 0:
                 if language == 'ru':
@@ -283,11 +288,16 @@ def quick_add_words(request):
 def edit_word(request, word_id):
     language = get_language(request)
     word = get_object_or_404(Word, id=word_id, user=request.user)
+    old_filter = word.word_filter
 
     if request.method == 'POST':
         form = WordForm(request.POST, instance=word, user=request.user)
         if form.is_valid():
             updated_word = form.save()
+
+            if old_filter != updated_word.word_filter:
+                delete_filter_if_empty(old_filter)
+
             if language == 'ru':
                 messages.success(
                     request,

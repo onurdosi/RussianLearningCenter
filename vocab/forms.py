@@ -73,6 +73,18 @@ class WordForm(forms.ModelForm):
 
         return new_filter_name
 
+    def clean(self):
+        cleaned_data = super().clean()
+        word_filter = cleaned_data.get('word_filter')
+        new_filter_name = cleaned_data.get('new_filter_name', '')
+
+        if word_filter and new_filter_name:
+            raise forms.ValidationError(
+                'Choose an existing filter or create a new one, not both.'
+            )
+
+        return cleaned_data
+
     def save(self, commit=True):
         word = super().save(commit=False)
         new_filter_name = self.cleaned_data.get('new_filter_name', '')
