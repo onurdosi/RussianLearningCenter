@@ -55,9 +55,9 @@
 
             {% if user.is_authenticated %}
                 <a
-                    href="{% url 'change_password' %}"
+                    href="{% url 'profile' %}"
                     class="account-button"
-                    title="{% if language == 'ru' %}Аккаунт{% else %}Account{% endif %}"
+                    title="{% if language == 'ru' %}Профиль{% else %}Profile{% endif %}"
                 >
                     👤
                 </a>

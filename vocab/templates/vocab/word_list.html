@@ -2,179 +2,114 @@
 {% load static %}
 
 {% block content %}
-<h2>
-    {% if language == 'ru' %}
-        Все слова ({{ result_count }})
-    {% else %}
-        All Words ({{ result_count }})
-    {% endif %}
-</h2>
+<h2>{% if language == 'ru' %}Все слова{% else %}All Words{% endif %} ({{ result_count }})</h2>
 
 <div class="word-card">
     <form method="get">
-        <p>
-            <label><strong>{% if language == 'ru' %}Поиск:{% else %}Search:{% endif %}</strong></label>
-            <input
-                type="text"
-                name="search"
-                value="{{ search_query }}"
-                placeholder="{% if language == 'ru' %}Искать русское слово или английский перевод{% else %}Search Russian word or translation{% endif %}"
-            >
-        </p>
+        <label>{% if language == 'ru' %}Поиск{% else %}Search{% endif %}</label>
+        <input type="text" name="search" value="{{ search_query }}">
 
-        <p>
-            <label><strong>{% if language == 'ru' %}Показать сложность сверху:{% else %}Bring difficulty to top:{% endif %}</strong></label>
-            <select name="difficulty">
-                <option value="">{% if language == 'ru' %}Все{% else %}All{% endif %}</option>
-                <option value="easy" {% if selected_difficulty == 'easy' %}selected{% endif %}>
-                    {% if language == 'ru' %}Легко{% else %}Easy{% endif %}
-                </option>
-                <option value="medium" {% if selected_difficulty == 'medium' %}selected{% endif %}>
-                    {% if language == 'ru' %}Средне{% else %}Medium{% endif %}
-                </option>
-                <option value="hard" {% if selected_difficulty == 'hard' %}selected{% endif %}>
-                    {% if language == 'ru' %}Сложно{% else %}Hard{% endif %}
-                </option>
-            </select>
-        </p>
+        <label>{% if language == 'ru' %}Фильтр{% else %}Filter{% endif %}</label>
+        <select name="filter">
+            <option value="">{% if language == 'ru' %}Все{% else %}All{% endif %}</option>
+            <option value="none" {% if selected_filter == 'none' %}selected{% endif %}>
+                {% if language == 'ru' %}Без фильтра{% else %}No Filter{% endif %}
+            </option>
 
-        <button type="submit">
-            {% if language == 'ru' %}Применить{% else %}Apply{% endif %}
-        </button>
-        <a href="{% url 'word_list' %}" class="button-link">
-            {% if language == 'ru' %}Очистить{% else %}Clear{% endif %}
-        </a>
+            {% for filter in word_filters %}
+                <option value="{{ filter.id }}" {% if selected_filter == filter.id|stringformat:"s" %}selected{% endif %}>
+                    {{ filter.name }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <button type="submit">{% if language == 'ru' %}Применить{% else %}Apply{% endif %}</button>
+        <a href="{% url 'word_list' %}" class="button-link">{% if language == 'ru' %}Очистить{% else %}Clear{% endif %}</a>
     </form>
 </div>
 
 <div id="word-detail-panel" class="word-detail-panel hidden">
     <h3 id="detail-russian-word"></h3>
 
-    <p>
-        <strong>{% if language == 'ru' %}Английский перевод:{% else %}Translation:{% endif %}</strong>
-        <span id="detail-translation"></span>
-    </p>
-
-    <p>
-        <strong>{% if language == 'ru' %}Сложность:{% else %}Difficulty:{% endif %}</strong>
-        <span id="detail-difficulty"></span>
-    </p>
+    <p><strong>{% if language == 'ru' %}Перевод:{% else %}Translation:{% endif %}</strong> <span id="detail-translation"></span></p>
+    <p><strong>{% if language == 'ru' %}Фильтр:{% else %}Filter:{% endif %}</strong> <span id="detail-filter"></span></p>
 
     <p id="detail-notes-row">
         <strong>{% if language == 'ru' %}Заметки:{% else %}Notes:{% endif %}</strong>
         <span id="detail-notes"></span>
     </p>
 
-    <a id="detail-edit-link" href="#" class="button-link button-edit">
-        ✎&nbsp;&nbsp;{% if language == 'ru' %}Редактировать{% else %}Edit{% endif %}
-    </a>
-
-    <a id="detail-delete-link" href="#" class="button-link button-danger">
-        ✖&nbsp;&nbsp;{% if language == 'ru' %}Удалить{% else %}Delete{% endif %}
-    </a>
+    <a id="detail-edit-link" href="#" class="button-link button-edit">✎ {% if language == 'ru' %}Редактировать{% else %}Edit{% endif %}</a>
+    <a id="detail-delete-link" href="#" class="button-link button-danger">✖ {% if language == 'ru' %}Удалить{% else %}Delete{% endif %}</a>
 </div>
 
-{% if selected_difficulty %}
-    <h3>
-        {% if selected_difficulty == 'easy' %}
-            {% if language == 'ru' %}Легкие слова{% else %}Easy Words{% endif %}
-        {% elif selected_difficulty == 'medium' %}
-            {% if language == 'ru' %}Средние слова{% else %}Medium Words{% endif %}
-        {% elif selected_difficulty == 'hard' %}
-            {% if language == 'ru' %}Сложные слова{% else %}Hard Words{% endif %}
-        {% endif %}
-        ({{ selected_count }})
-    </h3>
+<div class="word-grid">
+    {% for word in words %}
+        <button
+            type="button"
+            class="word-tile"
+            data-russian="{{ word.russian_word|escapejs }}"
+            data-translation="{{ word.translation|escapejs }}"
+            data-filter="{% if word.word_filter %}{{ word.word_filter.name|escapejs }}{% else %}{% if language == 'ru' %}Без фильтра{% else %}No Filter{% endif %}{% endif %}"
+            data-notes="{{ word.notes|escapejs }}"
+            data-edit-url="{% url 'edit_word' word.id %}"
+            data-delete-url="{% url 'delete_word' word.id %}"
+        >
+            {{ word.russian_word }}
+        </button>
+    {% empty %}
+        <p>{% if language == 'ru' %}Слова не найдены.{% else %}No words found.{% endif %}</p>
+    {% endfor %}
+</div>
 
-    <div class="word-grid">
-        {% for word in selected_words %}
-            <button
-                type="button"
-                class="word-tile"
-                data-russian="{{ word.russian_word }}"
-                data-translation="{{ word.translation }}"
-                {% if language == 'ru' %}
-                    {% if word.difficulty == 'easy' %}
-                        data-difficulty="Легко"
-                    {% elif word.difficulty == 'medium' %}
-                        data-difficulty="Средне"
-                    {% elif word.difficulty == 'hard' %}
-                        data-difficulty="Сложно"
-                    {% endif %}
-                {% else %}
-                    data-difficulty="{{ word.get_difficulty_display }}"
-                {% endif %}
-                data-notes="{{ word.notes }}"
-                data-edit-url="{% url 'edit_word' word.id %}"
-                data-delete-url="{% url 'delete_word' word.id %}"
-            >
-                {{ word.russian_word }}
-            </button>
-        {% empty %}
-            <p>{% if language == 'ru' %}Слова этой сложности не найдены.{% else %}No words found for this difficulty.{% endif %}</p>
-        {% endfor %}
-    </div>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const wordButtons = document.querySelectorAll(".word-tile");
+    const detailPanel = document.getElementById("word-detail-panel");
 
-    <h3>{% if language == 'ru' %}Другие слова{% else %}Other Words{% endif %}</h3>
+    const detailRussianWord = document.getElementById("detail-russian-word");
+    const detailTranslation = document.getElementById("detail-translation");
+    const detailFilter = document.getElementById("detail-filter");
+    const detailNotes = document.getElementById("detail-notes");
+    const detailNotesRow = document.getElementById("detail-notes-row");
+    const detailEditLink = document.getElementById("detail-edit-link");
+    const detailDeleteLink = document.getElementById("detail-delete-link");
 
-    <div class="word-grid">
-        {% for word in other_words %}
-            <button
-                type="button"
-                class="word-tile"
-                data-russian="{{ word.russian_word }}"
-                data-translation="{{ word.translation }}"
-                {% if language == 'ru' %}
-                    {% if word.difficulty == 'easy' %}
-                        data-difficulty="Легко"
-                    {% elif word.difficulty == 'medium' %}
-                        data-difficulty="Средне"
-                    {% elif word.difficulty == 'hard' %}
-                        data-difficulty="Сложно"
-                    {% endif %}
-                {% else %}
-                    data-difficulty="{{ word.get_difficulty_display }}"
-                {% endif %}
-                data-notes="{{ word.notes }}"
-                data-edit-url="{% url 'edit_word' word.id %}"
-                data-delete-url="{% url 'delete_word' word.id %}"
-            >
-                {{ word.russian_word }}
-            </button>
-        {% empty %}
-            <p>{% if language == 'ru' %}Другие слова не найдены.{% else %}No other words found.{% endif %}</p>
-        {% endfor %}
-    </div>
-{% else %}
-    <div class="word-grid">
-        {% for word in words %}
-            <button
-                type="button"
-                class="word-tile"
-                data-russian="{{ word.russian_word }}"
-                data-translation="{{ word.translation }}"
-                {% if language == 'ru' %}
-                    {% if word.difficulty == 'easy' %}
-                        data-difficulty="Легко"
-                    {% elif word.difficulty == 'medium' %}
-                        data-difficulty="Средне"
-                    {% elif word.difficulty == 'hard' %}
-                        data-difficulty="Сложно"
-                    {% endif %}
-                {% else %}
-                    data-difficulty="{{ word.get_difficulty_display }}"
-                {% endif %}
-                data-notes="{{ word.notes }}"
-                data-edit-url="{% url 'edit_word' word.id %}"
-                data-delete-url="{% url 'delete_word' word.id %}"
-            >
-                {{ word.russian_word }}
-            </button>
-        {% empty %}
-            <p>{% if language == 'ru' %}Ничего не найдено. Попробуйте изменить поиск.{% else %}No results found. Try changing your search.{% endif %}</p>
-        {% endfor %}
-    </div>
-{% endif %}
+    let selectedWord = null;
 
-<script src="{% static 'js/word_detail.js' %}"></script>
+    wordButtons.forEach(function (button) {
+        button.addEventListener("click", function () {
+            if (selectedWord === button) {
+                detailPanel.classList.add("hidden");
+                button.classList.remove("selected-word");
+                selectedWord = null;
+                return;
+            }
+
+            wordButtons.forEach(function (wordButton) {
+                wordButton.classList.remove("selected-word");
+            });
+
+            selectedWord = button;
+            button.classList.add("selected-word");
+
+            detailRussianWord.textContent = button.dataset.russian || "";
+            detailTranslation.textContent = button.dataset.translation || "";
+            detailFilter.textContent = button.dataset.filter || "No Filter";
+            detailEditLink.href = button.dataset.editUrl || "#";
+            detailDeleteLink.href = button.dataset.deleteUrl || "#";
+
+            if (button.dataset.notes) {
+                detailNotes.textContent = button.dataset.notes;
+                detailNotesRow.style.display = "block";
+            } else {
+                detailNotes.textContent = "";
+                detailNotesRow.style.display = "none";
+            }
+
+            detailPanel.classList.remove("hidden");
+        });
+    });
+});
+</script>
 {% endblock %}

@@ -1,0 +1,72 @@
+{% extends 'vocab/base.html' %}
+
+{% block content %}
+<h2>{% if language == 'ru' %}Аккаунт{% else %}Account{% endif %}</h2>
+
+<div class="word-card">
+    <details>
+        <summary>
+            <strong>{% if language == 'ru' %}Управление фильтрами{% else %}Manage Filters{% endif %}</strong>
+        </summary>
+
+        {% if word_filters %}
+            {% for filter in word_filters %}
+                <p>
+                    <strong>{{ filter.name }}</strong>
+                    <a href="{% url 'delete_filter' filter.id %}" class="button-link button-danger">
+                        ✖ {% if language == 'ru' %}Удалить{% else %}Delete{% endif %}
+                    </a>
+                </p>
+            {% endfor %}
+        {% else %}
+            <p>{% if language == 'ru' %}Фильтров пока нет.{% else %}No filters yet.{% endif %}</p>
+        {% endif %}
+    </details>
+</div>
+
+<div class="word-card">
+    <details>
+        <summary>
+            <strong>{% if language == 'ru' %}Изменить пароль{% else %}Change Password{% endif %}</strong>
+        </summary>
+
+        <form method="post">
+            {% csrf_token %}
+
+            {{ form.non_field_errors }}
+
+            <p>
+                <label for="{{ form.old_password.id_for_label }}">
+                    {% if language == 'ru' %}Текущий пароль{% else %}Current Password{% endif %}
+                </label>
+                {{ form.old_password }}
+                {{ form.old_password.errors }}
+            </p>
+
+            <p>
+                <label for="{{ form.new_password1.id_for_label }}">
+                    {% if language == 'ru' %}Новый пароль{% else %}New Password{% endif %}
+                </label>
+                {{ form.new_password1 }}
+                {{ form.new_password1.errors }}
+            </p>
+
+            <p>
+                <label for="{{ form.new_password2.id_for_label }}">
+                    {% if language == 'ru' %}Повторите новый пароль{% else %}Confirm New Password{% endif %}
+                </label>
+                {{ form.new_password2 }}
+                {{ form.new_password2.errors }}
+            </p>
+
+            <button type="submit">
+                {% if language == 'ru' %}Сохранить пароль{% else %}Save Password{% endif %}
+            </button>
+
+            <a href="{% url 'home' %}" class="button-link">
+                {% if language == 'ru' %}Отмена{% else %}Cancel{% endif %}
+            </a>
+        </form>
+    </details>
+</div>
+{% endblock %}

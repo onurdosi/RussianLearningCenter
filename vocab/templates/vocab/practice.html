@@ -3,22 +3,28 @@
 {% block content %}
 <h2>{% if language == 'ru' %}Практика{% else %}Practice Mode{% endif %}</h2>
 
-{% if choose_difficulty %}
+{% if choose_filter %}
     <div class="word-card">
         <form method="get">
             <p>
-                <label for="difficulty">
+                <label for="filter">
                     <strong>
-                        {% if language == 'ru' %}Выберите сложность:{% else %}Choose difficulty:{% endif %}
+                        {% if language == 'ru' %}Выберите фильтр:{% else %}Choose filter:{% endif %}
                     </strong>
                 </label>
             </p>
-            <select name="difficulty" id="difficulty">
-                <option value="any">{% if language == 'ru' %}Любая{% else %}Any{% endif %}</option>
-                <option value="easy">{% if language == 'ru' %}Легко{% else %}Easy{% endif %}</option>
-                <option value="medium">{% if language == 'ru' %}Средне{% else %}Medium{% endif %}</option>
-                <option value="hard">{% if language == 'ru' %}Сложно{% else %}Hard{% endif %}</option>
+
+            <select name="filter" id="filter">
+                <option value="any">{% if language == 'ru' %}Все слова{% else %}Any{% endif %}</option>
+                <option value="none">{% if language == 'ru' %}Без фильтра{% else %}No Filter{% endif %}</option>
+
+                {% for filter in word_filters %}
+                    <option value="{{ filter.id }}">
+                        {{ filter.name }}
+                    </option>
+                {% endfor %}
             </select>
+
             <button type="submit">
                 {% if language == 'ru' %}Начать практику{% else %}Start Practice{% endif %}
             </button>
@@ -29,19 +35,21 @@
     <div class="word-card">
         <p>
             {% if language == 'ru' %}
-                Нужно минимум 3 слова выбранной сложности, чтобы начать практику.
+                Нужно минимум 3 слова в выбранном фильтре, чтобы начать практику.
             {% else %}
-                You need at least 3 words in the selected difficulty to use practice mode.
+                You need at least 3 words in the selected filter to use practice mode.
             {% endif %}
         </p>
-        <a href="{% url 'practice_word' %}" class="button-link">
-            {% if language == 'ru' %}Выбрать другую сложность{% else %}Choose Another Difficulty{% endif %}
+
+        <a href="{% url 'practice_word' %}?restart=1" class="button-link">
+            {% if language == 'ru' %}Выбрать другой фильтр{% else %}Choose Another Filter{% endif %}
         </a>
     </div>
 
 {% elif practice_complete %}
     <div class="word-card">
         <h3>{% if language == 'ru' %}Практика завершена{% else %}Practice complete{% endif %}</h3>
+
         <p>
             <strong>{% if language == 'ru' %}Итоговый результат:{% else %}Final score:{% endif %}</strong>
             {{ score }}/{{ total_words }}
@@ -56,9 +64,19 @@
                         <strong>{% if language == 'ru' %}Русское слово:{% else %}Russian word:{% endif %}</strong>
                         {{ word.russian_word }}
                     </p>
+
                     <p>
                         <strong>{% if language == 'ru' %}Английский перевод:{% else %}Translation:{% endif %}</strong>
                         {{ word.translation }}
+                    </p>
+
+                    <p>
+                        <strong>{% if language == 'ru' %}Фильтр:{% else %}Filter:{% endif %}</strong>
+                        {% if word.word_filter %}
+                            {{ word.word_filter.name }}
+                        {% else %}
+                            {% if language == 'ru' %}Без фильтра{% else %}No Filter{% endif %}
+                        {% endif %}
                     </p>
 
                     {% if word.notes %}
@@ -78,6 +96,7 @@
                         Great job!
                     {% endif %}
                 </strong>
+
                 {% if language == 'ru' %}
                     Вы ответили правильно на все вопросы.
                 {% else %}
@@ -94,11 +113,18 @@
 {% else %}
     <div class="word-card">
         <p>
-            <strong>{% if language == 'ru' %}Сложность:{% else %}Difficulty:{% endif %}</strong>
-            {% if selected_difficulty == 'any' %}
-                {% if language == 'ru' %}Любая{% else %}Any{% endif %}
+            <strong>{% if language == 'ru' %}Фильтр:{% else %}Filter:{% endif %}</strong>
+
+            {% if selected_filter == 'any' %}
+                {% if language == 'ru' %}Все слова{% else %}Any{% endif %}
+            {% elif selected_filter == 'none' %}
+                {% if language == 'ru' %}Без фильтра{% else %}No Filter{% endif %}
             {% else %}
-                {{ selected_difficulty|title }}
+                {% for filter in word_filters %}
+                    {% if selected_filter == filter.id|stringformat:"s" %}
+                        {{ filter.name }}
+                    {% endif %}
+                {% endfor %}
             {% endif %}
         </p>
 
@@ -122,6 +148,7 @@
                 <p class="result-wrong">
                     <strong>{% if language == 'ru' %}Неправильно.{% else %}Wrong.{% endif %}</strong>
                 </p>
+
                 <p>
                     <strong>{% if language == 'ru' %}Правильный ответ:{% else %}Correct answer:{% endif %}</strong>
                     {{ correct_answer }}

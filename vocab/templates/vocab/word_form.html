@@ -23,23 +23,19 @@
     </p>
 
     <p>
-        <label for="id_difficulty">
-            {% if language == 'ru' %}Сложность{% else %}Difficulty{% endif %}
+        <label for="{{ form.word_filter.id_for_label }}">
+            {% if language == 'ru' %}Фильтр{% else %}Filter{% endif %}
         </label>
+        {{ form.word_filter }}
+        {{ form.word_filter.errors }}
+    </p>
 
-        <select name="difficulty" id="id_difficulty">
-            <option value="easy" {% if form.difficulty.value == 'easy' %}selected{% endif %}>
-                {% if language == 'ru' %}Легко{% else %}Easy{% endif %}
-            </option>
-            <option value="medium" {% if form.difficulty.value == 'medium' %}selected{% endif %}>
-                {% if language == 'ru' %}Средне{% else %}Medium{% endif %}
-            </option>
-            <option value="hard" {% if form.difficulty.value == 'hard' %}selected{% endif %}>
-                {% if language == 'ru' %}Сложно{% else %}Hard{% endif %}
-            </option>
-        </select>
-
-        {{ form.difficulty.errors }}
+    <p>
+        <label for="{{ form.new_filter_name.id_for_label }}">
+            {% if language == 'ru' %}Новый фильтр{% else %}New Filter{% endif %}
+        </label>
+        {{ form.new_filter_name }}
+        {{ form.new_filter_name.errors }}
     </p>
 
     <p>

@@ -1,0 +1,48 @@
+{% extends 'vocab/base.html' %}
+
+{% block content %}
+<h2>{% if language == 'ru' %}Удалить фильтр{% else %}Delete Filter{% endif %}</h2>
+
+<div class="word-card">
+    <p>
+        {% if language == 'ru' %}
+            Вы уверены, что хотите удалить этот фильтр?
+        {% else %}
+            Are you sure you want to delete this filter?
+        {% endif %}
+    </p>
+
+    <p>
+        <strong>{% if language == 'ru' %}Фильтр:{% else %}Filter:{% endif %}</strong>
+        {{ word_filter.name }}
+    </p>
+
+    <p>
+        {% if language == 'ru' %}
+            Слов в этом фильтре:
+        {% else %}
+            Words in this filter:
+        {% endif %}
+        <strong>{{ word_count }}</strong>
+    </p>
+
+    <p>
+        {% if language == 'ru' %}
+            Слова не будут удалены. Они будут перемещены в "Без фильтра".
+        {% else %}
+            The words will not be deleted. They will be moved to No Filter.
+        {% endif %}
+    </p>
+
+    <form method="post" style="display: inline;">
+        {% csrf_token %}
+        <button type="submit" class="button-danger">
+            ✖ {% if language == 'ru' %}Да, удалить фильтр{% else %}Yes, delete filter{% endif %}
+        </button>
+    </form>
+
+    <a href="{% url 'word_list' %}" class="button-link">
+        ↩ {% if language == 'ru' %}Отмена{% else %}Cancel{% endif %}
+    </a>
+</div>
+{% endblock %}

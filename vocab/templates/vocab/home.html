@@ -4,16 +4,16 @@
     {% if language == 'ru' %}
         <h2>Добро пожаловать</h2>
         <p>
-            Это приложение помогает пользователям изучать английские слова,
-            используя русский язык как основу.
+            Это приложение помогает пользователям изучать слова
+            с помощью собственных фильтров и практики.
         </p>
 
         <h3>Статистика словаря</h3>
     {% else %}
         <h2>Welcome</h2>
         <p>
-            This is my Russian vocabulary learning app. It helps users save words,
-            track difficulty, and add personal notes for better context.
+            Organize your vocabulary using custom filters
+            and practice specific word groups.
         </p>
 
         <h3>Vocabulary Statistics</h3>
@@ -28,23 +28,33 @@
         </div>
 
         <div class="stat-card">
-            <span class="stat-number">{{ easy_words }}</span>
+            <span class="stat-number">{{ total_filters }}</span>
             <span class="stat-label">
-                {% if language == 'ru' %}Легкие{% else %}Easy{% endif %}
+                {% if language == 'ru' %}Фильтры{% else %}Filters{% endif %}
             </span>
         </div>
 
         <div class="stat-card">
-            <span class="stat-number">{{ medium_words }}</span>
+            <span class="stat-number">{{ unfiltered_words }}</span>
             <span class="stat-label">
-                {% if language == 'ru' %}Средние{% else %}Medium{% endif %}
+                {% if language == 'ru' %}Без фильтра{% else %}No Filter{% endif %}
             </span>
         </div>
 
         <div class="stat-card">
-            <span class="stat-number">{{ hard_words_count }}</span>
+            <span class="stat-number">
+                {{ largest_filter_count }}
+            </span>
             <span class="stat-label">
-                {% if language == 'ru' %}Сложные{% else %}Hard{% endif %}
+                {% if largest_filter %}
+                    {{ largest_filter.name }}
+                {% else %}
+                    {% if language == 'ru' %}
+                        Нет фильтров
+                    {% else %}
+                        No Filters
+                    {% endif %}
+                {% endif %}
             </span>
         </div>
     </div>
@@ -52,20 +62,20 @@
     {% if language == 'ru' %}
         <h3>Что можно делать</h3>
         <ul>
-            <li>Сохранять слова</li>
-            <li>Добавлять переводы</li>
-            <li>Выбирать уровень сложности</li>
-            <li>Добавлять личные заметки</li>
-            <li>Практиковать сложные слова отдельно</li>
+            <li>Создавать собственные фильтры</li>
+            <li>Организовывать слова по темам</li>
+            <li>Практиковать отдельные группы слов</li>
+            <li>Добавлять заметки</li>
+            <li>Использовать поиск</li>
         </ul>
     {% else %}
         <h3>What you can do</h3>
         <ul>
-            <li>Save Russian words</li>
-            <li>Add translations</li>
-            <li>Track difficulty</li>
-            <li>Add personal notes</li>
-            <li>Review hard words separately</li>
+            <li>Create custom filters</li>
+            <li>Organize words by topic</li>
+            <li>Practice specific word groups</li>
+            <li>Add notes</li>
+            <li>Use search</li>
         </ul>
     {% endif %}
 {% endblock %}

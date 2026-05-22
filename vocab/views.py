@@ -12,11 +12,16 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 
 from .forms import QuickAddForm, WordForm
-from .models import Word
+from .models import Word, WordFilter
 
 
 def get_language(request):
     return request.session.get('language', 'en')
+
+
+def delete_filter_if_empty(word_filter):
+    if word_filter and not Word.objects.filter(word_filter=word_filter).exists():
+        word_filter.delete()
 
 
 def set_language(request, language):
@@ -72,8 +77,9 @@ def logout_view(request):
 
 
 @login_required
-def change_password(request):
+def profile(request):
     language = get_language(request)
+    word_filters = WordFilter.objects.filter(user=request.user)
 
     if request.method == 'POST':
         form = PasswordChangeForm(request.user, request.POST)
@@ -90,27 +96,38 @@ def change_password(request):
     else:
         form = PasswordChangeForm(request.user)
 
-    return render(request, 'vocab/change_password.html', {
+    return render(request, 'vocab/profile.html', {
         'language': language,
         'form': form,
+        'word_filters': word_filters,
     })
 
 
 @login_required
 def home(request):
     user_words = Word.objects.filter(user=request.user)
+    user_filters = WordFilter.objects.filter(user=request.user)
 
     total_words = user_words.count()
-    easy_words = user_words.filter(difficulty='easy').count()
-    medium_words = user_words.filter(difficulty='medium').count()
-    hard_words_count = user_words.filter(difficulty='hard').count()
+    total_filters = user_filters.count()
+    unfiltered_words = user_words.filter(word_filter__isnull=True).count()
+
+    largest_filter = None
+    largest_filter_count = 0
+
+    for word_filter in user_filters:
+        count = user_words.filter(word_filter=word_filter).count()
+        if count > largest_filter_count:
+            largest_filter = word_filter
+            largest_filter_count = count
 
     context = {
         'language': get_language(request),
         'total_words': total_words,
-        'easy_words': easy_words,
-        'medium_words': medium_words,
-        'hard_words_count': hard_words_count,
+        'total_filters': total_filters,
+        'unfiltered_words': unfiltered_words,
+        'largest_filter': largest_filter,
+        'largest_filter_count': largest_filter_count,
     }
 
     return render(request, 'vocab/home.html', context)
@@ -118,10 +135,11 @@ def home(request):
 
 @login_required
 def word_list(request):
-    selected_difficulty = request.GET.get('difficulty')
+    selected_filter = request.GET.get('filter')
     search_query = request.GET.get('search', '').strip()
 
     words = Word.objects.filter(user=request.user)
+    word_filters = WordFilter.objects.filter(user=request.user)
 
     if search_query:
         words = words.filter(
@@ -129,28 +147,20 @@ def word_list(request):
             Q(translation__icontains=search_query)
         )
 
+    if selected_filter == 'none':
+        words = words.filter(word_filter__isnull=True)
+    elif selected_filter:
+        words = words.filter(word_filter_id=selected_filter)
+
     result_count = words.count()
-
-    selected_words = []
-    other_words = words
-    selected_count = 0
-
-    if selected_difficulty in ['easy', 'medium', 'hard']:
-        selected_words = words.filter(difficulty=selected_difficulty)
-        other_words = words.exclude(difficulty=selected_difficulty)
-        selected_count = selected_words.count()
-    else:
-        selected_difficulty = ''
 
     context = {
         'language': get_language(request),
         'words': words,
-        'selected_words': selected_words,
-        'other_words': other_words,
-        'selected_difficulty': selected_difficulty,
+        'word_filters': word_filters,
+        'selected_filter': selected_filter or '',
         'search_query': search_query,
         'result_count': result_count,
-        'selected_count': selected_count,
     }
 
     return render(request, 'vocab/word_list.html', context)
@@ -163,9 +173,7 @@ def add_word(request):
     if request.method == 'POST':
         form = WordForm(request.POST, user=request.user)
         if form.is_valid():
-            word = form.save(commit=False)
-            word.user = request.user
-            word.save()
+            word = form.save()
 
             if language == 'ru':
                 messages.success(
@@ -189,17 +197,23 @@ def add_word(request):
         'title': title,
     })
 
-
 @login_required
 def quick_add_words(request):
     language = get_language(request)
 
     if request.method == 'POST':
-        form = QuickAddForm(request.POST)
+        form = QuickAddForm(request.POST, user=request.user)
         if form.is_valid():
             russian_words = form.cleaned_data['russian_words_list']
             translations = form.cleaned_data['translations_list']
-            difficulty = form.cleaned_data['difficulty']
+            word_filter = form.cleaned_data.get('word_filter')
+            new_filter_name = form.cleaned_data.get('new_filter_name', '')
+
+            if new_filter_name:
+                word_filter = WordFilter.objects.create(
+                    user=request.user,
+                    name=new_filter_name,
+                )
 
             existing_words_normalized = {
                 word.russian_word.strip().lower()
@@ -224,7 +238,8 @@ def quick_add_words(request):
                     user=request.user,
                     russian_word=russian_word.strip(),
                     translation=translation.strip(),
-                    difficulty=difficulty,
+                    difficulty='medium',
+                    word_filter=word_filter,
                     notes='',
                 )
                 words_added_in_this_batch.add(normalized_word)
@@ -256,7 +271,7 @@ def quick_add_words(request):
 
             return redirect('word_list')
     else:
-        form = QuickAddForm()
+        form = QuickAddForm(user=request.user)
 
     return render(request, 'vocab/quick_add.html', {
         'language': language,
@@ -303,7 +318,9 @@ def delete_word(request, word_id):
 
     if request.method == 'POST':
         word_name = word.russian_word
+        old_filter = word.word_filter
         word.delete()
+        delete_filter_if_empty(old_filter)
         if language == 'ru':
             messages.success(
                 request,
@@ -323,9 +340,53 @@ def delete_word(request, word_id):
 
 
 @login_required
+def delete_filter(request, filter_id):
+    language = get_language(request)
+    word_filter = get_object_or_404(
+        WordFilter,
+        id=filter_id,
+        user=request.user
+    )
+
+    if request.method == 'POST':
+        filter_name = word_filter.name
+
+        Word.objects.filter(
+            user=request.user,
+            word_filter=word_filter
+        ).update(word_filter=None)
+
+        word_filter.delete()
+
+        if language == 'ru':
+            messages.success(
+                request,
+                f'Фильтр "{filter_name}" удалён. Слова перемещены в "Без фильтра".'
+            )
+        else:
+            messages.success(
+                request,
+                f'Filter "{filter_name}" was deleted. Words were moved to No Filter.'
+            )
+
+        return redirect('word_list')
+
+    word_count = Word.objects.filter(
+        user=request.user,
+        word_filter=word_filter
+    ).count()
+
+    return render(request, 'vocab/delete_filter.html', {
+        'language': language,
+        'word_filter': word_filter,
+        'word_count': word_count,
+    })
+
+
+@login_required
 def practice_word(request):
     language = get_language(request)
-    difficulty = request.GET.get('difficulty')
+    selected_filter = request.GET.get('filter')
     restart = request.GET.get('restart')
     max_questions = 10
 
@@ -333,13 +394,15 @@ def practice_word(request):
         request.session.pop('practice_word_ids', None)
         request.session.pop('practice_index', None)
         request.session.pop('practice_score', None)
-        request.session.pop('practice_difficulty', None)
+        request.session.pop('practice_filter', None)
         request.session.pop('used_correct_answers', None)
         request.session.pop('wrong_word_ids', None)
 
     if restart:
         reset_practice_session()
         return redirect('practice_word')
+
+    word_filters = WordFilter.objects.filter(user=request.user)
 
     if request.method == 'POST':
         selected_answer = request.POST.get('selected_answer')
@@ -354,7 +417,7 @@ def practice_word(request):
         practice_word_ids = request.session.get('practice_word_ids', [])
         practice_index = request.session.get('practice_index', 0)
         practice_score = request.session.get('practice_score', 0)
-        practice_difficulty = request.session.get('practice_difficulty', 'any')
+        practice_filter = request.session.get('practice_filter', 'any')
         used_correct_answers = request.session.get('used_correct_answers', [])
         wrong_word_ids = request.session.get('wrong_word_ids', [])
 
@@ -390,26 +453,39 @@ def practice_word(request):
             'practice_complete': False,
             'total_words': total_words,
             'current_number': practice_index + 1,
-            'selected_difficulty': practice_difficulty,
+            'selected_filter': practice_filter,
+            'word_filters': word_filters,
         }
 
         return render(request, 'vocab/practice.html', context)
 
-    if difficulty:
-        if difficulty in ['easy', 'medium', 'hard']:
+    if selected_filter:
+        if selected_filter == 'none':
             words = list(
-                Word.objects.filter(user=request.user, difficulty=difficulty)
+                Word.objects.filter(
+                    user=request.user,
+                    word_filter__isnull=True,
+                )
             )
-            selected_difficulty = difficulty
-        else:
+            practice_filter = 'none'
+        elif selected_filter == 'any':
             words = list(Word.objects.filter(user=request.user))
-            selected_difficulty = 'any'
+            practice_filter = 'any'
+        else:
+            words = list(
+                Word.objects.filter(
+                    user=request.user,
+                    word_filter_id=selected_filter,
+                )
+            )
+            practice_filter = selected_filter
 
         if len(words) < 3:
             return render(request, 'vocab/practice.html', {
                 'language': language,
                 'not_enough_words': True,
-                'selected_difficulty': selected_difficulty,
+                'selected_filter': practice_filter,
+                'word_filters': word_filters,
             })
 
         random.shuffle(words)
@@ -420,21 +496,22 @@ def practice_word(request):
         ]
         request.session['practice_index'] = 0
         request.session['practice_score'] = 0
-        request.session['practice_difficulty'] = selected_difficulty
+        request.session['practice_filter'] = practice_filter
         request.session['used_correct_answers'] = []
         request.session['wrong_word_ids'] = []
 
     practice_word_ids = request.session.get('practice_word_ids')
     practice_index = request.session.get('practice_index', 0)
     practice_score = request.session.get('practice_score', 0)
-    selected_difficulty = request.session.get('practice_difficulty')
+    practice_filter = request.session.get('practice_filter')
     used_correct_answers = request.session.get('used_correct_answers', [])
 
     if not practice_word_ids:
         return render(request, 'vocab/practice.html', {
             'language': language,
-            'choose_difficulty': True,
-            'selected_difficulty': 'any',
+            'choose_filter': True,
+            'selected_filter': 'any',
+            'word_filters': word_filters,
         })
 
     total_words = len(practice_word_ids)
@@ -451,8 +528,9 @@ def practice_word(request):
             'practice_complete': True,
             'score': practice_score,
             'total_words': total_words,
-            'selected_difficulty': selected_difficulty,
+            'selected_filter': practice_filter,
             'wrong_words': wrong_words,
+            'word_filters': word_filters,
         })
 
     current_word_id = practice_word_ids[practice_index]
@@ -470,10 +548,15 @@ def practice_word(request):
         Word.objects.filter(user=request.user).exclude(id=current_word.id)
     )
 
-    if selected_difficulty in ['easy', 'medium', 'hard']:
+    if practice_filter == 'none':
         available_wrong_words = [
             word for word in available_wrong_words
-            if word.difficulty == selected_difficulty
+            if word.word_filter is None
+        ]
+    elif practice_filter not in ['any', None]:
+        available_wrong_words = [
+            word for word in available_wrong_words
+            if str(word.word_filter_id) == str(practice_filter)
         ]
 
     if language == 'ru':
@@ -495,7 +578,8 @@ def practice_word(request):
         return render(request, 'vocab/practice.html', {
             'language': language,
             'not_enough_words': True,
-            'selected_difficulty': selected_difficulty,
+            'selected_filter': practice_filter,
+            'word_filters': word_filters,
         })
 
     if language == 'ru':
@@ -528,8 +612,9 @@ def practice_word(request):
         'practice_complete': False,
         'total_words': total_words,
         'current_number': practice_index + 1,
-        'selected_difficulty': selected_difficulty,
-        'choose_difficulty': False,
+        'selected_filter': practice_filter,
+        'choose_filter': False,
+        'word_filters': word_filters,
     }
 
     return render(request, 'vocab/practice.html', context)
