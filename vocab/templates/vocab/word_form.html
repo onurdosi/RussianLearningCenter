@@ -6,6 +6,8 @@
 <form method="post">
     {% csrf_token %}
 
+    {{ form.non_field_errors }}
+
     <p>
         <label for="{{ form.russian_word.id_for_label }}">
             {% if language == 'ru' %}Русское слово{% else %}Russian word{% endif %}
@@ -22,21 +24,30 @@
         {{ form.translation.errors }}
     </p>
 
-    <p>
-        <label for="{{ form.word_filter.id_for_label }}">
-            {% if language == 'ru' %}Фильтр{% else %}Filter{% endif %}
-        </label>
-        {{ form.word_filter }}
-        {{ form.word_filter.errors }}
-    </p>
+    <div class="word-card">
+        <details>
+            <summary>
+                <strong>{% if language == 'ru' %}Фильтр{% else %}Filter{% endif %}</strong>
+                — {% if language == 'ru' %}необязательно{% else %}optional{% endif %}
+            </summary>
 
-    <p>
-        <label for="{{ form.new_filter_name.id_for_label }}">
-            {% if language == 'ru' %}Новый фильтр{% else %}New Filter{% endif %}
-        </label>
-        {{ form.new_filter_name }}
-        {{ form.new_filter_name.errors }}
-    </p>
+            <p>
+                <label for="{{ form.word_filter.id_for_label }}">
+                    {% if language == 'ru' %}Выбрать фильтр{% else %}Choose Filter{% endif %}
+                </label>
+                {{ form.word_filter }}
+                {{ form.word_filter.errors }}
+            </p>
+
+            <p>
+                <label for="{{ form.new_filter_name.id_for_label }}">
+                    {% if language == 'ru' %}Новый фильтр{% else %}New Filter{% endif %}
+                </label>
+                {{ form.new_filter_name }}
+                {{ form.new_filter_name.errors }}
+            </p>
+        </details>
+    </div>
 
     <p>
         <label for="{{ form.notes.id_for_label }}">

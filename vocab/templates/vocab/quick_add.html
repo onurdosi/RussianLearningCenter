@@ -33,21 +33,30 @@
         {{ form.translations.errors }}
     </p>
 
-    <p>
-        <label for="{{ form.word_filter.id_for_label }}">
-            {% if language == 'ru' %}Фильтр{% else %}Filter{% endif %}
-        </label>
-        {{ form.word_filter }}
-        {{ form.word_filter.errors }}
-    </p>
+    <div class="word-card">
+        <details>
+            <summary>
+                <strong>{% if language == 'ru' %}Фильтр{% else %}Filter{% endif %}</strong>
+                — {% if language == 'ru' %}необязательно{% else %}optional{% endif %}
+            </summary>
 
-    <p>
-        <label for="{{ form.new_filter_name.id_for_label }}">
-            {% if language == 'ru' %}Новый фильтр{% else %}New Filter{% endif %}
-        </label>
-        {{ form.new_filter_name }}
-        {{ form.new_filter_name.errors }}
-    </p>
+            <p>
+                <label for="{{ form.word_filter.id_for_label }}">
+                    {% if language == 'ru' %}Выбрать фильтр{% else %}Choose Filter{% endif %}
+                </label>
+                {{ form.word_filter }}
+                {{ form.word_filter.errors }}
+            </p>
+
+            <p>
+                <label for="{{ form.new_filter_name.id_for_label }}">
+                    {% if language == 'ru' %}Новый фильтр{% else %}New Filter{% endif %}
+                </label>
+                {{ form.new_filter_name }}
+                {{ form.new_filter_name.errors }}
+            </p>
+        </details>
+    </div>
 
     <button type="submit">
         {% if language == 'ru' %}Сохранить несколько слов{% else %}Save Bulk{% endif %}

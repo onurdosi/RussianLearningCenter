@@ -1,0 +1,26 @@
+{% extends 'vocab/base.html' %}
+
+{% block content %}
+<h2>{% if language == 'ru' %}Редактировать фильтр{% else %}Edit Filter{% endif %}</h2>
+
+<div class="word-card">
+    <form method="post">
+        {% csrf_token %}
+
+        <p>
+            <label for="name">
+                {% if language == 'ru' %}Название фильтра{% else %}Filter Name{% endif %}
+            </label>
+            <input type="text" name="name" id="name" value="{{ word_filter.name }}" required>
+        </p>
+
+        <button type="submit">
+            {% if language == 'ru' %}Сохранить{% else %}Save{% endif %}
+        </button>
+
+        <a href="{% url 'profile' %}" class="button-link">
+            {% if language == 'ru' %}Отмена{% else %}Cancel{% endif %}
+        </a>
+    </form>
+</div>
+{% endblock %}

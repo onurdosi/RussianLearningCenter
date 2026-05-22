@@ -1,0 +1,54 @@
+{% extends 'vocab/base.html' %}
+
+{% block content %}
+<h2>{% if language == 'ru' %}Удалить все слова{% else %}Delete All Words{% endif %}</h2>
+
+<div class="word-card">
+    <p>
+        {% if language == 'ru' %}
+            Это удалит все слова и все фильтры в вашем аккаунте.
+        {% else %}
+            This will delete all words and all filters in your account.
+        {% endif %}
+    </p>
+
+    <p>
+        <strong>{% if language == 'ru' %}Слов:{% else %}Words:{% endif %}</strong>
+        {{ word_count }}
+    </p>
+
+    <p>
+        <strong>{% if language == 'ru' %}Фильтров:{% else %}Filters:{% endif %}</strong>
+        {{ filter_count }}
+    </p>
+
+    <p>
+        <strong>
+            {% if language == 'ru' %}
+                Для подтверждения введите пароль.
+            {% else %}
+                Enter your password to confirm.
+            {% endif %}
+        </strong>
+    </p>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <p>
+            <label for="password">
+                {% if language == 'ru' %}Пароль{% else %}Password{% endif %}
+            </label>
+            <input type="password" name="password" id="password" required>
+        </p>
+
+        <button type="submit" class="button-danger">
+            ✖ {% if language == 'ru' %}Удалить всё{% else %}Delete Everything{% endif %}
+        </button>
+
+        <a href="{% url 'profile' %}" class="button-link">
+            ↩ {% if language == 'ru' %}Отмена{% else %}Cancel{% endif %}
+        </a>
+    </form>
+</div>
+{% endblock %}

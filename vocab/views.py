@@ -393,6 +393,127 @@ def delete_filter(request, filter_id):
 
 
 @login_required
+def edit_filter(request, filter_id):
+    language = get_language(request)
+    word_filter = get_object_or_404(
+        WordFilter,
+        id=filter_id,
+        user=request.user
+    )
+
+    if request.method == 'POST':
+        new_name = request.POST.get('name', '').strip()
+
+        if not new_name:
+            messages.error(request, 'Filter name cannot be empty.')
+            return redirect('edit_filter', filter_id=filter_id)
+
+        exists = WordFilter.objects.filter(
+            user=request.user,
+            name__iexact=new_name
+        ).exclude(id=filter_id).exists()
+
+        if exists:
+            messages.error(request, 'A filter with this name already exists.')
+            return redirect('edit_filter', filter_id=filter_id)
+
+        word_filter.name = new_name
+        word_filter.save()
+
+        messages.success(request, 'Filter was updated successfully.')
+        return redirect('profile')
+
+    return render(request, 'vocab/edit_filter.html', {
+        'language': language,
+        'word_filter': word_filter,
+    })
+
+
+@login_required
+def delete_filter_words(request, filter_id):
+    language = get_language(request)
+    word_filter = get_object_or_404(
+        WordFilter,
+        id=filter_id,
+        user=request.user
+    )
+
+    word_count = Word.objects.filter(
+        user=request.user,
+        word_filter=word_filter
+    ).count()
+
+    if request.method == 'POST':
+        filter_name = word_filter.name
+
+        Word.objects.filter(
+            user=request.user,
+            word_filter=word_filter
+        ).delete()
+
+        word_filter.delete()
+
+        if language == 'ru':
+            messages.success(
+                request,
+                f'Фильтр "{filter_name}" и {word_count} слов(а) удалены.'
+            )
+        else:
+            messages.success(
+                request,
+                f'Filter "{filter_name}" and {word_count} word(s) were deleted.'
+            )
+
+        return redirect('profile')
+
+    return render(request, 'vocab/delete_filter_words.html', {
+        'language': language,
+        'word_filter': word_filter,
+        'word_count': word_count,
+    })
+
+
+@login_required
+def delete_all_words(request):
+    language = get_language(request)
+    word_count = Word.objects.filter(user=request.user).count()
+    filter_count = WordFilter.objects.filter(user=request.user).count()
+
+    if request.method == 'POST':
+        password = request.POST.get('password', '')
+
+        if not request.user.check_password(password):
+            if language == 'ru':
+                messages.error(request, 'Неверный пароль.')
+            else:
+                messages.error(request, 'Incorrect password.')
+
+            return redirect('delete_all_words')
+
+        Word.objects.filter(user=request.user).delete()
+        WordFilter.objects.filter(user=request.user).delete()
+
+        if language == 'ru':
+            messages.success(
+                request,
+                f'Все слова ({word_count}) и фильтры ({filter_count}) удалены.'
+            )
+        else:
+            messages.success(
+                request,
+                f'All words ({word_count}) and filters ({filter_count}) were deleted.'
+            )
+
+        return redirect('profile')
+
+    return render(request, 'vocab/delete_all_words.html', {
+        'language': language,
+        'word_count': word_count,
+        'filter_count': filter_count,
+    })
+
+
+@login_required
 def practice_word(request):
     language = get_language(request)
     selected_filter = request.GET.get('filter')

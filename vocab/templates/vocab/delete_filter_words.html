@@ -1,0 +1,46 @@
+{% extends 'vocab/base.html' %}
+
+{% block content %}
+<h2>{% if language == 'ru' %}Удалить фильтр и слова{% else %}Delete Filter and Words{% endif %}</h2>
+
+<div class="word-card">
+    <p>
+        {% if language == 'ru' %}
+            Вы уверены, что хотите удалить этот фильтр и все слова внутри него?
+        {% else %}
+            Are you sure you want to delete this filter and all words inside it?
+        {% endif %}
+    </p>
+
+    <p>
+        <strong>{% if language == 'ru' %}Фильтр:{% else %}Filter:{% endif %}</strong>
+        {{ word_filter.name }}
+    </p>
+
+    <p>
+        <strong>{% if language == 'ru' %}Количество слов:{% else %}Word count:{% endif %}</strong>
+        {{ word_count }}
+    </p>
+
+    <p>
+        <strong>
+            {% if language == 'ru' %}
+                Это действие нельзя отменить.
+            {% else %}
+                This action cannot be undone.
+            {% endif %}
+        </strong>
+    </p>
+
+    <form method="post" style="display: inline;">
+        {% csrf_token %}
+        <button type="submit" class="button-danger">
+            ✖ {% if language == 'ru' %}Да, удалить фильтр и слова{% else %}Yes, delete filter and words{% endif %}
+        </button>
+    </form>
+
+    <a href="{% url 'profile' %}" class="button-link">
+        ↩ {% if language == 'ru' %}Отмена{% else %}Cancel{% endif %}
+    </a>
+</div>
+{% endblock %}

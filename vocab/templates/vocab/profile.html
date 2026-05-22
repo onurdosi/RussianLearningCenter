@@ -9,18 +9,83 @@
             <strong>{% if language == 'ru' %}Управление фильтрами{% else %}Manage Filters{% endif %}</strong>
         </summary>
 
+        <p>
+            <em>
+                {% if language == 'ru' %}
+                    Примечание: если удалить только фильтр, слова будут перемещены в "Без фильтра".
+                {% else %}
+                    Note: deleting only a filter will move its words to No Filter.
+                {% endif %}
+            </em>
+        </p>
+
         {% if word_filters %}
             {% for filter in word_filters %}
-                <p>
+                <div class="word-card">
                     <strong>{{ filter.name }}</strong>
-                    <a href="{% url 'delete_filter' filter.id %}" class="button-link button-danger">
-                        ✖ {% if language == 'ru' %}Удалить{% else %}Delete{% endif %}
-                    </a>
-                </p>
+
+                    <p>
+                        <a href="{% url 'edit_filter' filter.id %}" class="button-link button-edit">
+                            {% if language == 'ru' %}Редактировать{% else %}Edit{% endif %}
+                        </a>
+
+                        <a href="{% url 'delete_filter' filter.id %}" class="button-link button-danger">
+                            {% if language == 'ru' %}Удалить только фильтр{% else %}Delete Filter Only{% endif %}
+                        </a>
+                    </p>
+                </div>
             {% endfor %}
         {% else %}
             <p>{% if language == 'ru' %}Фильтров пока нет.{% else %}No filters yet.{% endif %}</p>
         {% endif %}
+    </details>
+</div>
+
+<div class="word-card">
+    <details>
+        <summary>
+            <strong>{% if language == 'ru' %}Удалить слова{% else %}Delete Words{% endif %}</strong>
+        </summary>
+
+        {% if word_filters %}
+            <h3>{% if language == 'ru' %}Удалить фильтр и его слова{% else %}Delete Filter and Its Words{% endif %}</h3>
+
+            <p>
+                {% if language == 'ru' %}
+                    Это удалит выбранный фильтр и все слова внутри него.
+                {% else %}
+                    This deletes the selected filter and all words inside it.
+                {% endif %}
+            </p>
+
+            {% for filter in word_filters %}
+                <div class="word-card">
+                    <strong>{{ filter.name }}</strong>
+
+                    <p>
+                        <a href="{% url 'delete_filter_words' filter.id %}" class="button-link button-danger">
+                            {% if language == 'ru' %}Удалить фильтр и слова{% else %}Delete Filter + Words{% endif %}
+                        </a>
+                    </p>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>{% if language == 'ru' %}Нет фильтров для удаления.{% else %}No filters to delete by.{% endif %}</p>
+        {% endif %}
+
+        <h3>{% if language == 'ru' %}Удалить всё{% else %}Delete Everything{% endif %}</h3>
+
+        <p>
+            {% if language == 'ru' %}
+                Это удалит все слова и фильтры аккаунта. Требуется пароль.
+            {% else %}
+                This deletes all words and filters in the account. Password required.
+            {% endif %}
+        </p>
+
+        <a href="{% url 'delete_all_words' %}" class="button-link button-danger">
+            {% if language == 'ru' %}Удалить все слова аккаунта{% else %}Delete All Account Words{% endif %}
+        </a>
     </details>
 </div>
 
