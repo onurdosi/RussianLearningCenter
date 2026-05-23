@@ -1,48 +1,60 @@
 {% extends 'vocab/base.html' %}
 
 {% block content %}
-<h2>{% if language == 'ru' %}Быстрое добавление слов{% else %}Quick Add Words{% endif %}</h2>
-
-<div class="word-card">
-    <p>
-        {% if language == 'ru' %}
-            Добавьте несколько слов сразу. Введите русские слова и английские переводы через запятую.
-        {% else %}
-            Add multiple words at once by entering Russian words and translations separated by commas.
-        {% endif %}
-    </p>
-</div>
+<h2>{% if language == 'ru' %}Быстрое добавление{% else %}Quick Add{% endif %}</h2>
 
 <form method="post">
     {% csrf_token %}
+
     {{ form.non_field_errors }}
 
-    <p>
-        <label for="{{ form.russian_words.id_for_label }}">
-            {% if language == 'ru' %}Русские слова{% else %}Russian words{% endif %}
-        </label>
-        {{ form.russian_words }}
-        {{ form.russian_words.errors }}
-    </p>
+    {% if language == 'ru' %}
+        <p>
+            <label for="{{ form.translations.id_for_label }}">
+                Английские слова
+            </label>
+            {{ form.translations }}
+            {{ form.translations.errors }}
+        </p>
 
-    <p>
-        <label for="{{ form.translations.id_for_label }}">
-            {% if language == 'ru' %}Английские переводы{% else %}Translations{% endif %}
-        </label>
-        {{ form.translations }}
-        {{ form.translations.errors }}
-    </p>
+        <p>
+            <label for="{{ form.russian_words.id_for_label }}">
+                Русские переводы
+            </label>
+            {{ form.russian_words }}
+            {{ form.russian_words.errors }}
+        </p>
+    {% else %}
+        <p>
+            <label for="{{ form.russian_words.id_for_label }}">
+                Russian words
+            </label>
+            {{ form.russian_words }}
+            {{ form.russian_words.errors }}
+        </p>
+
+        <p>
+            <label for="{{ form.translations.id_for_label }}">
+                Translations
+            </label>
+            {{ form.translations }}
+            {{ form.translations.errors }}
+        </p>
+    {% endif %}
 
     <div class="word-card">
         <details>
             <summary>
-                <strong>{% if language == 'ru' %}Фильтр{% else %}Filter{% endif %}</strong>
-                — {% if language == 'ru' %}необязательно{% else %}optional{% endif %}
+                {% if language == 'ru' %}
+                    Настройки фильтра
+                {% else %}
+                    Filter Options
+                {% endif %}
             </summary>
 
             <p>
                 <label for="{{ form.word_filter.id_for_label }}">
-                    {% if language == 'ru' %}Выбрать фильтр{% else %}Choose Filter{% endif %}
+                    {% if language == 'ru' %}Фильтр{% else %}Filter{% endif %}
                 </label>
                 {{ form.word_filter }}
                 {{ form.word_filter.errors }}

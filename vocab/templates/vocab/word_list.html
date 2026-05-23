@@ -12,6 +12,7 @@
         <label>{% if language == 'ru' %}Фильтр{% else %}Filter{% endif %}</label>
         <select name="filter">
             <option value="">{% if language == 'ru' %}Все{% else %}All{% endif %}</option>
+
             <option value="none" {% if selected_filter == 'none' %}selected{% endif %}>
                 {% if language == 'ru' %}Без фильтра{% else %}No Filter{% endif %}
             </option>
@@ -24,23 +25,37 @@
         </select>
 
         <button type="submit">{% if language == 'ru' %}Применить{% else %}Apply{% endif %}</button>
-        <a href="{% url 'word_list' %}" class="button-link">{% if language == 'ru' %}Очистить{% else %}Clear{% endif %}</a>
+        <a href="{% url 'word_list' %}" class="button-link">
+            {% if language == 'ru' %}Очистить{% else %}Clear{% endif %}
+        </a>
     </form>
 </div>
 
 <div id="word-detail-panel" class="word-detail-panel hidden">
-    <h3 id="detail-russian-word"></h3>
+    <h3 id="detail-main-word"></h3>
 
-    <p><strong>{% if language == 'ru' %}Перевод:{% else %}Translation:{% endif %}</strong> <span id="detail-translation"></span></p>
-    <p><strong>{% if language == 'ru' %}Фильтр:{% else %}Filter:{% endif %}</strong> <span id="detail-filter"></span></p>
+    <p>
+        <strong id="detail-secondary-label"></strong>
+        <span id="detail-secondary-word"></span>
+    </p>
+
+    <p>
+        <strong>{% if language == 'ru' %}Фильтр:{% else %}Filter:{% endif %}</strong>
+        <span id="detail-filter"></span>
+    </p>
 
     <p id="detail-notes-row">
         <strong>{% if language == 'ru' %}Заметки:{% else %}Notes:{% endif %}</strong>
         <span id="detail-notes"></span>
     </p>
 
-    <a id="detail-edit-link" href="#" class="button-link button-edit">✎ {% if language == 'ru' %}Редактировать{% else %}Edit{% endif %}</a>
-    <a id="detail-delete-link" href="#" class="button-link button-danger">✖ {% if language == 'ru' %}Удалить{% else %}Delete{% endif %}</a>
+    <a id="detail-edit-link" class="button-link button-edit" href="#">
+        ✎ {% if language == 'ru' %}Редактировать{% else %}Edit{% endif %}
+    </a>
+
+    <a id="detail-delete-link" class="button-link button-danger" href="#">
+        ✖ {% if language == 'ru' %}Удалить{% else %}Delete{% endif %}
+    </a>
 </div>
 
 <div class="word-grid">
@@ -54,62 +69,73 @@
             data-notes="{{ word.notes }}"
             data-edit-url="{% url 'edit_word' word.id %}"
             data-delete-url="{% url 'delete_word' word.id %}"
+            onclick="showWordDetails(this)"
         >
-            {{ word.russian_word }}
+            {% if language == 'ru' %}
+                {{ word.translation }}
+            {% else %}
+                {{ word.russian_word }}
+            {% endif %}
         </button>
     {% empty %}
-        <p>{% if language == 'ru' %}Слова не найдены.{% else %}No words found.{% endif %}</p>
+        <p>
+            {% if language == 'ru' %}
+                Слова не найдены.
+            {% else %}
+                No words found.
+            {% endif %}
+        </p>
     {% endfor %}
 </div>
 
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-    const wordButtons = document.querySelectorAll(".word-tile");
-    const detailPanel = document.getElementById("word-detail-panel");
+    function showWordDetails(button) {
+        const panel = document.getElementById('word-detail-panel');
+        const mainWord = document.getElementById('detail-main-word');
+        const secondaryLabel = document.getElementById('detail-secondary-label');
+        const secondaryWord = document.getElementById('detail-secondary-word');
+        const detailFilter = document.getElementById('detail-filter');
+        const detailNotes = document.getElementById('detail-notes');
+        const notesRow = document.getElementById('detail-notes-row');
+        const editLink = document.getElementById('detail-edit-link');
+        const deleteLink = document.getElementById('detail-delete-link');
 
-    const detailRussianWord = document.getElementById("detail-russian-word");
-    const detailTranslation = document.getElementById("detail-translation");
-    const detailFilter = document.getElementById("detail-filter");
-    const detailNotes = document.getElementById("detail-notes");
-    const detailNotesRow = document.getElementById("detail-notes-row");
-    const detailEditLink = document.getElementById("detail-edit-link");
-    const detailDeleteLink = document.getElementById("detail-delete-link");
+        const russianWord = button.dataset.russian;
+        const englishWord = button.dataset.translation;
+        const filter = button.dataset.filter;
+        const notes = button.dataset.notes;
 
-    let selectedWord = null;
+        {% if language == 'ru' %}
+            mainWord.textContent = englishWord;
+            secondaryLabel.textContent = 'Русский перевод: ';
+            secondaryWord.textContent = russianWord;
+        {% else %}
+            mainWord.textContent = russianWord;
+            secondaryLabel.textContent = 'Translation: ';
+            secondaryWord.textContent = englishWord;
+        {% endif %}
 
-    wordButtons.forEach(function (button) {
-        button.addEventListener("click", function () {
-            if (selectedWord === button) {
-                detailPanel.classList.add("hidden");
-                button.classList.remove("selected-word");
-                selectedWord = null;
-                return;
-            }
+        detailFilter.textContent = filter;
 
-            wordButtons.forEach(function (wordButton) {
-                wordButton.classList.remove("selected-word");
-            });
+        if (notes.trim()) {
+            notesRow.classList.remove('hidden');
+            detailNotes.textContent = notes;
+        } else {
+            notesRow.classList.add('hidden');
+            detailNotes.textContent = '';
+        }
 
-            selectedWord = button;
-            button.classList.add("selected-word");
+        editLink.href = button.dataset.editUrl;
+        deleteLink.href = button.dataset.deleteUrl;
 
-            detailRussianWord.textContent = button.dataset.russian || "";
-            detailTranslation.textContent = button.dataset.translation || "";
-            detailFilter.textContent = button.dataset.filter || "No Filter";
-            detailEditLink.href = button.dataset.editUrl || "#";
-            detailDeleteLink.href = button.dataset.deleteUrl || "#";
+        panel.classList.remove('hidden');
 
-            if (button.dataset.notes) {
-                detailNotes.textContent = button.dataset.notes;
-                detailNotesRow.style.display = "block";
-            } else {
-                detailNotes.textContent = "";
-                detailNotesRow.style.display = "none";
-            }
-
-            detailPanel.classList.remove("hidden");
+        const selectedWords = document.querySelectorAll('.selected-word');
+        selectedWords.forEach(function(wordButton) {
+            wordButton.classList.remove('selected-word');
         });
-    });
-});
+
+        button.classList.add('selected-word');
+    }
 </script>
 {% endblock %}
