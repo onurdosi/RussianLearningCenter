@@ -388,3 +388,33 @@ label {
 .stat-dropdown-content p {
     margin: 0;
 }
+
+
+.word-detail-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.word-detail-header h3 {
+    margin: 0;
+}
+
+.detail-close-button {
+    min-height: auto;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border-radius: 50%;
+    background-color: #dceaff !important;
+    color: #26364f !important;
+    border: 1px solid #bcd4ff;
+    font-size: 24px;
+    line-height: 1;
+    font-weight: bold;
+}
+
+.detail-close-button:hover {
+    background-color: #c9dcff !important;
+    color: #0f1f3d !important;
+}
