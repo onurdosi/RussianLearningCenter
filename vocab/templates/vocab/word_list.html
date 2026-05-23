@@ -294,6 +294,13 @@
 
         panel.classList.remove('hidden');
 
+        fetch(`/words/${button.dataset.editUrl.split('/')[2]}/track-open/`, {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": "{{ csrf_token }}"
+            }
+        });
+
         button.classList.add('selected-word');
     }
 

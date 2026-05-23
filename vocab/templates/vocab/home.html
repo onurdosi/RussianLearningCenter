@@ -1,22 +1,11 @@
 {% extends 'vocab/base.html' %}
 
 {% block content %}
+
     {% if language == 'ru' %}
-        <h2>Добро пожаловать</h2>
-        <p>
-            Это приложение помогает пользователям изучать слова
-            с помощью собственных фильтров и практики.
-        </p>
-
-        <h3>Статистика словаря</h3>
+        <h1>С возвращением, {{ request.user.username }}!</h1>
     {% else %}
-        <h2>Welcome</h2>
-        <p>
-            Organize your vocabulary using custom filters
-            and practice specific word groups.
-        </p>
-
-        <h3>Vocabulary Statistics</h3>
+        <h1>Welcome back, {{ request.user.username }}!</h1>
     {% endif %}
 
     <div class="stats-grid">
@@ -39,17 +28,125 @@
             </button>
 
             <div id="words-details" class="stat-dropdown-content hidden">
+
                 <p>
                     <strong>
                         {% if language == 'ru' %}
-                            Практиковалось:
+                            % всех слов практиковались:
                         {% else %}
-                            Practised:
+                            % of total words practised:
                         {% endif %}
                     </strong>
 
                     {{ practiced_percentage }}%
                 </p>
+
+                <hr>
+
+                <p>
+                    <strong>
+                        {% if language == 'ru' %}
+                            Самые частые ошибки:
+                        {% else %}
+                            Top mistakes:
+                        {% endif %}
+                    </strong>
+                </p>
+
+                {% if top_mistake_words %}
+                    <ul>
+                        {% for word in top_mistake_words %}
+                            <li>
+                                {% if language == 'ru' %}
+                                    {{ word.translation }}
+                                {% else %}
+                                    {{ word.russian_word }}
+                                {% endif %}
+                                — {{ word.practice_wrong_count }}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>
+                        {% if language == 'ru' %}
+                            Пока нет ошибок
+                        {% else %}
+                            No mistakes yet
+                        {% endif %}
+                    </p>
+                {% endif %}
+
+                <hr>
+
+                <p>
+                    <strong>
+                        {% if language == 'ru' %}
+                            Последние ошибки:
+                        {% else %}
+                            Most recent mistakes:
+                        {% endif %}
+                    </strong>
+                </p>
+
+                {% if recent_mistake_words %}
+                    <ul>
+                        {% for word in recent_mistake_words %}
+                            <li>
+                                {% if language == 'ru' %}
+                                    {{ word.translation }}
+                                {% else %}
+                                    {{ word.russian_word }}
+                                {% endif %}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>
+                        {% if language == 'ru' %}
+                            Пока нет недавних ошибок
+                        {% else %}
+                            No recent mistakes yet
+                        {% endif %}
+                    </p>
+                {% endif %}
+
+                <hr>
+
+                <p>
+                    <strong>
+                        {% if language == 'ru' %}
+                            Самое открываемое слово:
+                        {% else %}
+                            Most clicked word:
+                        {% endif %}
+                    </strong>
+
+                    {% if most_clicked_word %}
+                        {% if language == 'ru' %}
+                            {{ most_clicked_word.translation }}
+                        {% else %}
+                            {{ most_clicked_word.russian_word }}
+                        {% endif %}
+                        — {{ most_clicked_word.word_list_open_count }}
+                    {% else %}
+                        {% if language == 'ru' %}
+                            Пока нет
+                        {% else %}
+                            None yet
+                        {% endif %}
+                    {% endif %}
+                </p>
+
+                <hr>
+
+                <a href="{% url 'reset_statistics' %}" class="button-link button-danger">
+                    {% if language == 'ru' %}
+                        Сбросить статистику
+                    {% else %}
+                        Reset statistics
+                    {% endif %}
+                </a>
+
             </div>
         </div>
 
@@ -88,59 +185,20 @@
                             </li>
                         {% endif %}
                     </ul>
-
                 {% else %}
-
                     <p>
                         {% if language == 'ru' %}
                             Нет фильтров
                         {% else %}
-                            None
+                            No filters yet
                         {% endif %}
                     </p>
-
-                    {% if has_no_filter_words %}
-                        <ul>
-                            <li>
-                                {% if language == 'ru' %}
-                                    Без фильтра
-                                {% else %}
-                                    No Filter
-                                {% endif %}
-                            </li>
-                        </ul>
-                    {% endif %}
-
                 {% endif %}
+
             </div>
         </div>
 
     </div>
-
-    {% if language == 'ru' %}
-        <h3>Что можно делать</h3>
-
-        <ul>
-            <li>Создавать собственные фильтры</li>
-            <li>Организовывать слова по темам</li>
-            <li>Практиковать отдельные группы слов</li>
-            <li>Добавлять заметки</li>
-            <li>Использовать поиск</li>
-        </ul>
-
-    {% else %}
-
-        <h3>What you can do</h3>
-
-        <ul>
-            <li>Create custom filters</li>
-            <li>Organize words by topic</li>
-            <li>Practice specific word groups</li>
-            <li>Add notes</li>
-            <li>Use search</li>
-        </ul>
-
-    {% endif %}
 
     <script>
         function toggleStatBox(event, id) {

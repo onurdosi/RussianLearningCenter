@@ -1,0 +1,53 @@
+{% extends 'vocab/base.html' %}
+
+{% block content %}
+
+<h1>
+    {% if language == 'ru' %}
+        Сбросить статистику
+    {% else %}
+        Reset Statistics
+    {% endif %}
+</h1>
+
+<div class="word-card">
+
+    <p>
+        {% if language == 'ru' %}
+            Вы уверены, что хотите сбросить всю статистику обучения?
+        {% else %}
+            Are you sure you want to reset all learning statistics?
+        {% endif %}
+    </p>
+
+    <p>
+        {% if language == 'ru' %}
+            Слова и фильтры не будут удалены. Будут сброшены только просмотры, практика, ошибки и правильные ответы.
+        {% else %}
+            Your words and filters will not be deleted. Only views, practice counts, mistakes, and correct answers will be reset.
+        {% endif %}
+    </p>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <button type="submit" class="button-danger">
+            {% if language == 'ru' %}
+                Да, сбросить статистику
+            {% else %}
+                Yes, reset statistics
+            {% endif %}
+        </button>
+
+        <a href="{% url 'home' %}" class="button-link">
+            {% if language == 'ru' %}
+                Отмена
+            {% else %}
+                Cancel
+            {% endif %}
+        </a>
+    </form>
+
+</div>
+
+{% endblock %}

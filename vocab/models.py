@@ -36,5 +36,12 @@ class Word(models.Model):
 
     practiced_once = models.BooleanField(default=False)
 
+    word_list_open_count = models.PositiveIntegerField(default=0)
+    practice_seen_count = models.PositiveIntegerField(default=0)
+    practice_correct_count = models.PositiveIntegerField(default=0)
+    practice_wrong_count = models.PositiveIntegerField(default=0)
+    last_practiced_at = models.DateTimeField(null=True, blank=True)
+    last_wrong_at = models.DateTimeField(null=True, blank=True)
+
     def __str__(self):
         return self.russian_word

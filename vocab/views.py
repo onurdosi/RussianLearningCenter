@@ -8,7 +8,9 @@ from django.contrib.auth.forms import (
     PasswordChangeForm,
     UserCreationForm,
 )
-from django.db.models import Q
+from django.db.models import F, Q
+from django.http import JsonResponse
+from django.utils import timezone
 from django.shortcuts import get_object_or_404, redirect, render
 
 from .forms import QuickAddForm, WordForm
@@ -117,6 +119,18 @@ def home(request):
     else:
         practiced_percentage = 0
 
+    top_mistake_words = user_words.filter(
+        practice_wrong_count__gt=0
+    ).order_by('-practice_wrong_count', 'russian_word')[:3]
+
+    recent_mistake_words = user_words.filter(
+        last_wrong_at__isnull=False
+    ).order_by('-last_wrong_at')[:3]
+
+    most_clicked_word = user_words.filter(
+        word_list_open_count__gt=0
+    ).order_by('-word_list_open_count', 'russian_word').first()
+
     context = {
         'language': get_language(request),
         'total_words': total_words,
@@ -124,6 +138,9 @@ def home(request):
         'word_filters': user_filters,
         'has_no_filter_words': user_words.filter(word_filter__isnull=True).exists(),
         'practiced_percentage': practiced_percentage,
+        'top_mistake_words': top_mistake_words,
+        'recent_mistake_words': recent_mistake_words,
+        'most_clicked_word': most_clicked_word,
     }
 
     return render(request, 'vocab/home.html', context)
@@ -510,6 +527,81 @@ def delete_all_words(request):
 
 
 @login_required
+def reset_statistics(request):
+    language = get_language(request)
+
+    if request.method == 'POST':
+        Word.objects.filter(user=request.user).update(
+            practiced_once=False,
+            word_list_open_count=0,
+            practice_seen_count=0,
+            practice_correct_count=0,
+            practice_wrong_count=0,
+            last_practiced_at=None,
+            last_wrong_at=None,
+        )
+
+        if language == 'ru':
+            messages.success(request, 'Статистика успешно сброшена.')
+        else:
+            messages.success(request, 'Statistics were reset successfully.')
+
+        return redirect('home')
+
+    return render(request, 'vocab/reset_statistics.html', {
+        'language': language,
+    })
+
+
+def smart_practice_weight(word):
+    weight = 10
+
+    if word.practice_seen_count == 0:
+        weight += 35
+
+    weight += word.practice_wrong_count * 10
+    weight += word.word_list_open_count * 2
+
+    weight -= word.practice_correct_count * 4
+
+    if word.last_practiced_at:
+        days_since_practiced = (timezone.now() - word.last_practiced_at).days
+        weight += min(days_since_practiced, 14)
+    else:
+        weight += 20
+
+    return max(weight, 1)
+
+
+def smart_sample_words(words, max_questions):
+    selected_words = []
+    available_words = list(words)
+
+    while available_words and len(selected_words) < max_questions:
+        weights = [smart_practice_weight(word) for word in available_words]
+        chosen_word = random.choices(available_words, weights=weights, k=1)[0]
+
+        selected_words.append(chosen_word)
+        available_words.remove(chosen_word)
+
+    return selected_words
+
+
+@login_required
+def track_word_open(request, word_id):
+    if request.method != 'POST':
+        return JsonResponse({'ok': False}, status=405)
+
+    word = get_object_or_404(Word, id=word_id, user=request.user)
+
+    Word.objects.filter(id=word.id).update(
+        word_list_open_count=F('word_list_open_count') + 1
+    )
+
+    return JsonResponse({'ok': True})
+
+
+@login_required
 def practice_word(request):
     language = get_language(request)
     selected_filter = request.GET.get('filter')
@@ -541,6 +633,8 @@ def practice_word(request):
             return redirect('practice_word')
 
         current_word.practiced_once = True
+        current_word.practice_seen_count += 1
+        current_word.last_practiced_at = timezone.now()
         current_word.save()
 
         practice_word_ids = request.session.get('practice_word_ids', [])
@@ -559,9 +653,14 @@ def practice_word(request):
         if selected_answer == correct_answer:
             result = 'correct'
             practice_score += 1
+            current_word.practice_correct_count += 1
+            current_word.save()
             request.session['practice_score'] = practice_score
         else:
             result = 'wrong'
+            current_word.practice_wrong_count += 1
+            current_word.last_wrong_at = timezone.now()
+            current_word.save()
             if current_word.id not in wrong_word_ids:
                 wrong_word_ids.append(current_word.id)
             request.session['wrong_word_ids'] = wrong_word_ids
@@ -617,8 +716,7 @@ def practice_word(request):
                 'word_filters': word_filters,
             })
 
-        random.shuffle(words)
-        selected_words = words[:max_questions]
+        selected_words = smart_sample_words(words, max_questions)
 
         request.session['practice_word_ids'] = [
             word.id for word in selected_words
