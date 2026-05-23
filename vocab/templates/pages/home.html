@@ -8,6 +8,22 @@
         <h1>Welcome back, {{ request.user.username }}!</h1>
     {% endif %}
 
+    <div class="quote-box">
+
+        <div class="quote-title">
+            {% if language == 'ru' %}
+                Цитата дня
+            {% else %}
+                Quote of the Day
+            {% endif %}
+        </div>
+
+        <div class="quote-text">
+            “Discipline is key for mastery.”
+        </div>
+
+    </div>
+
     <div class="stats-grid">
 
         <div class="stat-dropdown">
@@ -198,6 +214,69 @@
             </div>
         </div>
 
+    </div>
+
+    <div class="creator-message-box">
+
+        <h2>
+            {% if language == 'ru' %}
+                Сообщение от создателя
+            {% else %}
+                Message from the creator
+            {% endif %}
+        </h2>
+
+        <p>
+            {% if language == 'ru' %}
+                Здравствуйте, дорогой пользователь или посетитель.
+                Я создал это приложение как свой Python-проект
+                для магистерской программы МФТИ.
+            {% else %}
+                Hello dear user or visitor.
+                I created this app as my Python project
+                for the MIPT Master's program.
+            {% endif %}
+        </p>
+
+        <p>
+            {% if language == 'ru' %}
+                Это Django-приложение, целью которого является
+                стать вашим личным словарём для слов,
+                которые действительно важны именно для вас.
+            {% else %}
+                It is a Django app with the purpose of being
+                your personal dictionary for words that matter to you.
+            {% endif %}
+        </p>
+
+        <p>
+            {% if language == 'ru' %}
+                Здесь вы можете практиковаться со своими словами,
+                организовывать их по фильтрам,
+                добавлять личные заметки,
+                а также использовать адаптивную систему обучения,
+                которая помогает наиболее эффективно изучать лексику.
+            {% else %}
+                An app where you can practise with your own words,
+                organise them under labels,
+                add personal notes to each word,
+                and use an adaptive learning backend
+                that helps you learn most effectively.
+            {% endif %}
+        </p>
+
+        <p class="dedication-line">
+            {% if language == 'ru' %}
+                Посвящается моей сестре и моей девушке.
+            {% else %}
+                I dedicate this app to my sister and girlfriend.
+            {% endif %}
+        </p>
+
+    </div>
+
+    <div class="creator-contact">
+        Contact: onurdosiyev@gmail.com
     </div>
 
     <script>

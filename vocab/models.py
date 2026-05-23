@@ -40,8 +40,12 @@ class Word(models.Model):
     practice_seen_count = models.PositiveIntegerField(default=0)
     practice_correct_count = models.PositiveIntegerField(default=0)
     practice_wrong_count = models.PositiveIntegerField(default=0)
+
     last_practiced_at = models.DateTimeField(null=True, blank=True)
     last_wrong_at = models.DateTimeField(null=True, blank=True)
+
+    next_review_at = models.DateTimeField(null=True, blank=True)
+    review_interval_days = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return self.russian_word

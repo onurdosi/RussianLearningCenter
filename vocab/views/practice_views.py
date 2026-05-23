@@ -1,6 +1,5 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
-from django.utils import timezone
 
 from vocab.constants import (
     FILTER_ANY,
@@ -16,6 +15,7 @@ from vocab.services.practice_service import (
     get_practice_words,
     select_wrong_words,
     smart_sample_words,
+    update_review_schedule,
 )
 
 
@@ -49,11 +49,6 @@ def practice_word(request):
             reset_practice_session()
             return redirect('practice_word')
 
-        current_word.practiced_once = True
-        current_word.practice_seen_count += 1
-        current_word.last_practiced_at = timezone.now()
-        current_word.save()
-
         practice_word_ids = request.session.get('practice_word_ids', [])
         practice_index = request.session.get('practice_index', 0)
         practice_score = request.session.get('practice_score', 0)
@@ -62,23 +57,26 @@ def practice_word(request):
         wrong_word_ids = request.session.get('wrong_word_ids', [])
 
         correct_answer = get_correct_answer(current_word, language)
+        answered_correctly = selected_answer == correct_answer
 
-        if selected_answer == correct_answer:
+        current_word.practice_seen_count += 1
+
+        if answered_correctly:
             result = 'correct'
             practice_score += 1
             current_word.practice_correct_count += 1
-            current_word.save()
             request.session['practice_score'] = practice_score
         else:
             result = 'wrong'
             current_word.practice_wrong_count += 1
-            current_word.last_wrong_at = timezone.now()
-            current_word.save()
 
             if current_word.id not in wrong_word_ids:
                 wrong_word_ids.append(current_word.id)
 
             request.session['wrong_word_ids'] = wrong_word_ids
+
+        update_review_schedule(current_word, answered_correctly)
+        current_word.save()
 
         used_correct_answers.append(correct_answer)
         request.session['used_correct_answers'] = used_correct_answers
@@ -120,7 +118,6 @@ def practice_word(request):
         request.session['practice_word_ids'] = [
             word.id for word in selected_words
         ]
-
         request.session['practice_index'] = 0
         request.session['practice_score'] = 0
         request.session['practice_filter'] = practice_filter

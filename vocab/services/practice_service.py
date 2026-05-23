@@ -1,4 +1,5 @@
 import random
+from datetime import timedelta
 
 from django.utils import timezone
 
@@ -6,28 +7,65 @@ from vocab.constants import FILTER_ANY, FILTER_NONE, LANGUAGE_RUSSIAN
 from vocab.models import Word
 
 
+def is_word_due(word):
+    if word.next_review_at is None:
+        return True
+
+    return word.next_review_at <= timezone.now()
+
+
 def smart_practice_weight(word):
     weight = 10
 
     if word.practice_seen_count == 0:
-        weight += 35
+        weight += 40
 
-    weight += word.practice_wrong_count * 10
-    weight += word.word_list_open_count * 2
-    weight -= word.practice_correct_count * 4
+    if is_word_due(word):
+        weight += 25
+    else:
+        weight -= 30
+
+    mistake_pressure = max(
+        word.practice_wrong_count - word.practice_correct_count,
+        0
+    )
+    weight += min(mistake_pressure, 3) * 6
+
+    weight += min(word.word_list_open_count, 5)
+
+    if word.practice_correct_count >= 2:
+        weight -= word.practice_correct_count * 5
 
     if word.last_practiced_at:
-        days_since_practiced = (timezone.now() - word.last_practiced_at).days
-        weight += min(days_since_practiced, 14)
-    else:
-        weight += 20
+        hours_since_practiced = (
+            timezone.now() - word.last_practiced_at
+        ).total_seconds() / 3600
+
+        if hours_since_practiced < 12:
+            weight -= 35
+        elif hours_since_practiced < 24:
+            weight -= 20
+        else:
+            days_since_practiced = int(hours_since_practiced // 24)
+            weight += min(days_since_practiced, 10)
 
     return max(weight, 1)
 
 
 def smart_sample_words(words, max_questions):
+    all_words = list(words)
+
+    due_words = [
+        word for word in all_words
+        if is_word_due(word)
+    ]
+
+    if len(due_words) >= 3:
+        available_words = due_words
+    else:
+        available_words = all_words
+
     selected_words = []
-    available_words = list(words)
 
     while available_words and len(selected_words) < max_questions:
         weights = [smart_practice_weight(word) for word in available_words]
@@ -37,6 +75,29 @@ def smart_sample_words(words, max_questions):
         available_words.remove(chosen_word)
 
     return selected_words
+
+
+def update_review_schedule(word, answered_correctly):
+    now = timezone.now()
+
+    if answered_correctly:
+        if word.review_interval_days == 0:
+            word.review_interval_days = 1
+        else:
+            word.review_interval_days = min(
+                word.review_interval_days * 2,
+                30
+            )
+
+        word.next_review_at = now + timedelta(days=word.review_interval_days)
+
+    else:
+        word.review_interval_days = 0
+        word.next_review_at = now + timedelta(hours=12)
+        word.last_wrong_at = now
+
+    word.last_practiced_at = now
+    word.practiced_once = True
 
 
 def get_correct_answer(word, language):

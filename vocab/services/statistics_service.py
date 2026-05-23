@@ -18,4 +18,6 @@ def reset_user_statistics(user):
         practice_wrong_count=0,
         last_practiced_at=None,
         last_wrong_at=None,
+        next_review_at=None,
+        review_interval_days=0,
     )
