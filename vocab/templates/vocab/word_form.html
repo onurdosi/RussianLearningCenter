@@ -42,27 +42,16 @@
         </p>
     {% endif %}
 
-    <p>
-        <label for="{{ form.notes.id_for_label }}">
-            {% if language == 'ru' %}Заметки{% else %}Notes{% endif %}
-        </label>
-        {{ form.notes }}
-        {{ form.notes.errors }}
-    </p>
-
     <div class="word-card">
         <details>
             <summary>
-                {% if language == 'ru' %}
-                    Настройки фильтра
-                {% else %}
-                    Filter Options
-                {% endif %}
+                <strong>{% if language == 'ru' %}Фильтр{% else %}Filter{% endif %}</strong>
+                — {% if language == 'ru' %}необязательно{% else %}optional{% endif %}
             </summary>
 
             <p>
                 <label for="{{ form.word_filter.id_for_label }}">
-                    {% if language == 'ru' %}Фильтр{% else %}Filter{% endif %}
+                    {% if language == 'ru' %}Выбрать фильтр{% else %}Choose Filter{% endif %}
                 </label>
                 {{ form.word_filter }}
                 {{ form.word_filter.errors }}
@@ -78,8 +67,34 @@
         </details>
     </div>
 
+    <p>
+        <label for="{{ form.notes.id_for_label }}">
+            {% if language == 'ru' %}Заметки{% else %}Notes{% endif %}
+        </label>
+        {{ form.notes }}
+        {{ form.notes.errors }}
+    </p>
+
     <button type="submit">
-        {% if language == 'ru' %}Сохранить{% else %}Save{% endif %}
+        {% if language == 'ru' %}Сохранить слово{% else %}Save Word{% endif %}
     </button>
 </form>
+
+{% if 'add' in request.path %}
+    <div class="word-card quick-add-card">
+        <h3>{% if language == 'ru' %}Добавить несколько слов{% else %}Add words in bulk{% endif %}</h3>
+
+        <p>
+            {% if language == 'ru' %}
+                Нужно добавить несколько слов сразу? Используйте Быстрое добавление.
+            {% else %}
+                Need to add several words at once? Use Quick Add.
+            {% endif %}
+        </p>
+
+        <a href="{% url 'quick_add_words' %}" class="button-link">
+            {% if language == 'ru' %}Быстрое добавление{% else %}Quick Add{% endif %}
+        </a>
+    </div>
+{% endif %}
 {% endblock %}

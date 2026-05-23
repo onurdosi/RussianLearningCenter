@@ -32,6 +32,10 @@
                         <a href="{% url 'delete_filter' filter.id %}" class="button-link button-danger">
                             {% if language == 'ru' %}Удалить только фильтр{% else %}Delete Filter Only{% endif %}
                         </a>
+
+                        <a href="{% url 'delete_filter_words' filter.id %}" class="button-link button-danger">
+                            {% if language == 'ru' %}Удалить фильтр и слова{% else %}Delete Filter + Words{% endif %}
+                        </a>
                     </p>
                 </div>
             {% endfor %}
@@ -46,32 +50,6 @@
         <summary>
             <strong>{% if language == 'ru' %}Удалить слова{% else %}Delete Words{% endif %}</strong>
         </summary>
-
-        {% if word_filters %}
-            <h3>{% if language == 'ru' %}Удалить фильтр и его слова{% else %}Delete Filter and Its Words{% endif %}</h3>
-
-            <p>
-                {% if language == 'ru' %}
-                    Это удалит выбранный фильтр и все слова внутри него.
-                {% else %}
-                    This deletes the selected filter and all words inside it.
-                {% endif %}
-            </p>
-
-            {% for filter in word_filters %}
-                <div class="word-card">
-                    <strong>{{ filter.name }}</strong>
-
-                    <p>
-                        <a href="{% url 'delete_filter_words' filter.id %}" class="button-link button-danger">
-                            {% if language == 'ru' %}Удалить фильтр и слова{% else %}Delete Filter + Words{% endif %}
-                        </a>
-                    </p>
-                </div>
-            {% endfor %}
-        {% else %}
-            <p>{% if language == 'ru' %}Нет фильтров для удаления.{% else %}No filters to delete by.{% endif %}</p>
-        {% endif %}
 
         <h3>{% if language == 'ru' %}Удалить всё{% else %}Delete Everything{% endif %}</h3>
 
