@@ -423,3 +423,141 @@ label {
 .quick-add-card {
     margin-top: 24px;
 }
+
+#id_notes {
+    height: 120px;
+    min-height: 80px;
+    resize: vertical;
+}
+
+.filter-summary {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.clear-fixed-filter {
+    min-height: 24px;
+    padding: 2px 9px;
+    border-radius: 999px;
+    font-size: 18px;
+    background-color: #dceaff;
+    color: #26364f !important;
+}
+
+.clear-fixed-filter:hover {
+    background-color: #c7dcff;
+    color: #26364f !important;
+}
+
+.fix-filter-button {
+    margin-top: 4px;
+}
+
+.fix-filter-button.fixed-active {
+    background-color: #0d47a1;
+}
+
+.page {
+    margin-top: 28px;
+    margin-bottom: 28px;
+    padding-top: 28px;
+    padding-bottom: 28px;
+}
+
+h1 {
+    margin-top: 0;
+    margin-bottom: 22px;
+}
+
+.word-card {
+    padding: 16px 20px;
+    margin-bottom: 16px;
+}
+
+.word-card p {
+    margin-top: 8px;
+    margin-bottom: 12px;
+}
+
+input,
+textarea,
+select {
+    margin-bottom: 12px;
+}
+
+#id_notes {
+    height: 90px;
+    min-height: 70px;
+    resize: vertical;
+}
+
+.filter-summary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.filter-arrow {
+    font-size: 18px;
+    font-weight: bold;
+    color: #0f1f3d;
+    line-height: 1;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 18px;
+}
+
+details[open] .filter-arrow {
+    transform: rotate(180deg);
+}
+
+.quick-add-card {
+    margin-top: 18px;
+}
+
+.form-actions {
+    display: flex;
+    align-items: center;
+
+    gap: 14px;
+
+    margin-top: 4px;
+}
+
+.quick-add-inline-button {
+    margin-left: auto;
+
+    min-height: 44px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 11px 28px;
+
+    border: 1px solid #bcd4ff;
+    border-radius: 6px;
+
+    background-color: #f7fbff;
+
+    color: #1565c0 !important;
+
+    font-size: 17px;
+    font-weight: bold;
+
+    text-decoration: none !important;
+
+    box-sizing: border-box;
+
+    white-space: nowrap;
+}
+
+.quick-add-inline-button:hover {
+    background-color: #eef4ff;
+    color: #0d47a1 !important;
+    text-decoration: none !important;
+}

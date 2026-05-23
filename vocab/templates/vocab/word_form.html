@@ -1,53 +1,73 @@
 {% extends 'vocab/base.html' %}
 
 {% block content %}
-<h2>{{ title }}</h2>
+
+<h1>{{ title }}</h1>
 
 <form method="post">
     {% csrf_token %}
 
-    {{ form.non_field_errors }}
-
-    {% if language == 'ru' %}
-        <p>
-            <label for="{{ form.translation.id_for_label }}">
-                Английское слово
-            </label>
-            {{ form.translation }}
-            {{ form.translation.errors }}
-        </p>
-
-        <p>
-            <label for="{{ form.russian_word.id_for_label }}">
-                Русский перевод
-            </label>
-            {{ form.russian_word }}
-            {{ form.russian_word.errors }}
-        </p>
-    {% else %}
-        <p>
-            <label for="{{ form.russian_word.id_for_label }}">
-                Russian word
-            </label>
-            {{ form.russian_word }}
-            {{ form.russian_word.errors }}
-        </p>
-
-        <p>
-            <label for="{{ form.translation.id_for_label }}">
-                Translation
-            </label>
-            {{ form.translation }}
-            {{ form.translation.errors }}
-        </p>
+    {% if form.non_field_errors %}
+        <div class="message message-error">
+            {{ form.non_field_errors }}
+        </div>
     {% endif %}
 
     <div class="word-card">
-        <details>
-            <summary>
-                <strong>{% if language == 'ru' %}Фильтр{% else %}Filter{% endif %}</strong>
-                — {% if language == 'ru' %}необязательно{% else %}optional{% endif %}
+        {% if language == 'ru' %}
+            <p>
+                <label for="{{ form.translation.id_for_label }}">Английское слово</label>
+                {{ form.translation }}
+                {{ form.translation.errors }}
+            </p>
+
+            <p>
+                <label for="{{ form.russian_word.id_for_label }}">Русский перевод</label>
+                {{ form.russian_word }}
+                {{ form.russian_word.errors }}
+            </p>
+        {% else %}
+            <p>
+                <label for="{{ form.russian_word.id_for_label }}">Russian word</label>
+                {{ form.russian_word }}
+                {{ form.russian_word.errors }}
+            </p>
+
+            <p>
+                <label for="{{ form.translation.id_for_label }}">Translation</label>
+                {{ form.translation }}
+                {{ form.translation.errors }}
+            </p>
+        {% endif %}
+    </div>
+
+    <div class="word-card">
+        <details id="filterDetails">
+            <summary class="filter-summary">
+                <span class="filter-arrow">▼</span>
+
+                <span>
+                    <strong>{% if language == 'ru' %}Фильтр{% else %}Filter{% endif %}</strong>
+                    —
+                    <span id="filterSummaryText">
+                        {% if language == 'ru' %}необязательно{% else %}optional{% endif %}
+                    </span>
+                </span>
+
+                {% if 'add' in request.path %}
+                    <button type="button" id="clearFixedFilterBtn" class="clear-fixed-filter hidden">×</button>
+                {% endif %}
             </summary>
+
+            {% if 'add' in request.path %}
+                <div id="fixFilterError" class="message message-error hidden">
+                    {% if language == 'ru' %}
+                        Сначала выберите фильтр или напишите новый фильтр.
+                    {% else %}
+                        Choose a filter or write a new filter first.
+                    {% endif %}
+                </div>
+            {% endif %}
 
             <p>
                 <label for="{{ form.word_filter.id_for_label }}">
@@ -64,37 +84,157 @@
                 {{ form.new_filter_name }}
                 {{ form.new_filter_name.errors }}
             </p>
+
+            {% if 'add' in request.path %}
+                <button type="button" id="fixFilterBtn" class="fix-filter-button">
+                    {% if language == 'ru' %}Закрепить фильтр{% else %}Fix filter{% endif %}
+                </button>
+            {% endif %}
         </details>
     </div>
 
-    <p>
-        <label for="{{ form.notes.id_for_label }}">
-            {% if language == 'ru' %}Заметки{% else %}Notes{% endif %}
-        </label>
-        {{ form.notes }}
-        {{ form.notes.errors }}
-    </p>
+    <div class="word-card">
+        <p>
+            <label for="{{ form.notes.id_for_label }}">
+                {% if language == 'ru' %}Заметки{% else %}Notes{% endif %}
+            </label>
+            {{ form.notes }}
+            {{ form.notes.errors }}
+        </p>
+    </div>
 
-    <button type="submit">
-        {% if language == 'ru' %}Сохранить слово{% else %}Save Word{% endif %}
-    </button>
+    <div class="form-actions">
+        <button type="submit">
+            {% if language == 'ru' %}Сохранить слово{% else %}Save Word{% endif %}
+        </button>
+
+        {% if 'add' in request.path %}
+            <a href="{% url 'quick_add_words' %}" class="quick-add-inline-button">
+                {% if language == 'ru' %}
+                    Быстро добавить несколько слов сразу
+                {% else %}
+                    Quick add in bulk — add multiple words at once
+                {% endif %}
+            </a>
+        {% endif %}
+    </div>
 </form>
 
 {% if 'add' in request.path %}
-    <div class="word-card quick-add-card">
-        <h3>{% if language == 'ru' %}Добавить несколько слов{% else %}Add words in bulk{% endif %}</h3>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const storageKey = "fixedWordFilterName";
 
-        <p>
-            {% if language == 'ru' %}
-                Нужно добавить несколько слов сразу? Используйте Быстрое добавление.
-            {% else %}
-                Need to add several words at once? Use Quick Add.
-            {% endif %}
-        </p>
+    const filterSelect = document.getElementById("id_word_filter");
+    const newFilterInput = document.getElementById("id_new_filter_name");
+    const summaryText = document.getElementById("filterSummaryText");
+    const fixButton = document.getElementById("fixFilterBtn");
+    const clearButton = document.getElementById("clearFixedFilterBtn");
+    const errorBox = document.getElementById("fixFilterError");
 
-        <a href="{% url 'quick_add_words' %}" class="button-link">
-            {% if language == 'ru' %}Быстрое добавление{% else %}Quick Add{% endif %}
-        </a>
-    </div>
+    if (!filterSelect || !newFilterInput || !summaryText || !fixButton || !clearButton) return;
+
+    function defaultText() {
+        return "{% if language == 'ru' %}необязательно{% else %}optional{% endif %}";
+    }
+
+    function getSelectedFilterText() {
+        const option = filterSelect.options[filterSelect.selectedIndex];
+
+        if (!option || !filterSelect.value) {
+            return "";
+        }
+
+        return option.text.trim();
+    }
+
+    function hideError() {
+        if (errorBox) {
+            errorBox.classList.add("hidden");
+        }
+    }
+
+    function showError() {
+        if (errorBox) {
+            errorBox.classList.remove("hidden");
+        }
+    }
+
+    function resetFixedFilter() {
+        summaryText.textContent = defaultText();
+        clearButton.classList.add("hidden");
+        fixButton.classList.remove("fixed-active");
+    }
+
+    function applyFixedFilter() {
+        const fixedFilterName = localStorage.getItem(storageKey);
+
+        if (!fixedFilterName) {
+            resetFixedFilter();
+            return;
+        }
+
+        let matchedExistingFilter = false;
+
+        for (const option of filterSelect.options) {
+            if (option.text.trim().toLowerCase() === fixedFilterName.toLowerCase()) {
+                filterSelect.value = option.value;
+                newFilterInput.value = "";
+                matchedExistingFilter = true;
+                break;
+            }
+        }
+
+        if (!matchedExistingFilter) {
+            filterSelect.value = "";
+            newFilterInput.value = fixedFilterName;
+        }
+
+        summaryText.textContent = fixedFilterName;
+        clearButton.classList.remove("hidden");
+        fixButton.classList.add("fixed-active");
+    }
+
+    fixButton.addEventListener("click", function () {
+        hideError();
+
+        const selectedFilterName = getSelectedFilterText();
+        const newFilterName = newFilterInput.value.trim();
+
+        if (!selectedFilterName && !newFilterName) {
+            showError();
+            return;
+        }
+
+        if (selectedFilterName && newFilterName) {
+            showError();
+            return;
+        }
+
+        const fixedFilterName = selectedFilterName || newFilterName;
+
+        localStorage.setItem(storageKey, fixedFilterName);
+        applyFixedFilter();
+    });
+
+    clearButton.addEventListener("click", function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        localStorage.removeItem(storageKey);
+        filterSelect.value = "";
+        newFilterInput.value = "";
+
+        hideError();
+        resetFixedFilter();
+    });
+
+    filterSelect.addEventListener("change", hideError);
+    newFilterInput.addEventListener("input", hideError);
+
+    applyFixedFilter();
+});
+</script>
 {% endif %}
+
 {% endblock %}

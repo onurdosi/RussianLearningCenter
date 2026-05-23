@@ -8,9 +8,7 @@ class WordForm(forms.ModelForm):
         required=False,
         label='New filter',
         max_length=50,
-        widget=forms.TextInput(attrs={
-            'placeholder': 'Optional: create a new filter',
-        }),
+        widget=forms.TextInput(),
     )
 
     class Meta:
@@ -25,6 +23,8 @@ class WordForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
+        self.language = kwargs.pop('language', 'en')
+
         super().__init__(*args, **kwargs)
 
         self.fields['word_filter'].required = False
@@ -36,6 +36,15 @@ class WordForm(forms.ModelForm):
             )
         else:
             self.fields['word_filter'].queryset = WordFilter.objects.none()
+
+        if self.language == 'ru':
+            self.fields['new_filter_name'].widget.attrs['placeholder'] = (
+                'Необязательно: создать новый фильтр'
+            )
+        else:
+            self.fields['new_filter_name'].widget.attrs['placeholder'] = (
+                'Optional: create a new filter'
+            )
 
     def clean_russian_word(self):
         russian_word = self.cleaned_data['russian_word'].strip()
@@ -110,14 +119,12 @@ class QuickAddForm(forms.Form):
         label='Russian words',
         widget=forms.Textarea(attrs={
             'rows': 4,
-            'placeholder': 'Example: привет, дом, вода',
         }),
     )
     translations = forms.CharField(
         label='Translations',
         widget=forms.Textarea(attrs={
             'rows': 4,
-            'placeholder': 'Example: hello, house, water',
         }),
     )
     word_filter = forms.ModelChoiceField(
@@ -129,18 +136,39 @@ class QuickAddForm(forms.Form):
         required=False,
         label='New filter',
         max_length=50,
-        widget=forms.TextInput(attrs={
-            'placeholder': 'Optional: create a new filter for these words',
-        }),
+        widget=forms.TextInput(),
     )
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
+        self.language = kwargs.pop('language', 'en')
+
         super().__init__(*args, **kwargs)
 
         if self.user:
             self.fields['word_filter'].queryset = WordFilter.objects.filter(
                 user=self.user
+            )
+
+        if self.language == 'ru':
+            self.fields['russian_words'].widget.attrs['placeholder'] = (
+                'Пример: привет, дом, вода'
+            )
+            self.fields['translations'].widget.attrs['placeholder'] = (
+                'Пример: hello, house, water'
+            )
+            self.fields['new_filter_name'].widget.attrs['placeholder'] = (
+                'Необязательно: создать новый фильтр для этих слов'
+            )
+        else:
+            self.fields['russian_words'].widget.attrs['placeholder'] = (
+                'Example: привет, дом, вода'
+            )
+            self.fields['translations'].widget.attrs['placeholder'] = (
+                'Example: hello, house, water'
+            )
+            self.fields['new_filter_name'].widget.attrs['placeholder'] = (
+                'Optional: create a new filter for these words'
             )
 
     def clean_new_filter_name(self):

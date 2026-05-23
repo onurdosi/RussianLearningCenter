@@ -167,7 +167,7 @@ def add_word(request):
     language = get_language(request)
 
     if request.method == 'POST':
-        form = WordForm(request.POST, user=request.user)
+        form = WordForm(request.POST, user=request.user, language=language)
         if form.is_valid():
             word = form.save()
 
@@ -183,7 +183,7 @@ def add_word(request):
                 )
             return redirect('word_list')
     else:
-        form = WordForm(user=request.user)
+        form = WordForm(user=request.user, language=language)
 
     title = 'Добавить слово' if language == 'ru' else 'Add Word'
 
@@ -198,7 +198,7 @@ def quick_add_words(request):
     language = get_language(request)
 
     if request.method == 'POST':
-        form = QuickAddForm(request.POST, user=request.user)
+        form = QuickAddForm(request.POST, user=request.user, language=language)
         if form.is_valid():
             russian_words = form.cleaned_data['russian_words_list']
             translations = form.cleaned_data['translations_list']
@@ -271,7 +271,7 @@ def quick_add_words(request):
 
             return redirect('word_list')
     else:
-        form = QuickAddForm(user=request.user)
+        form = QuickAddForm(user=request.user, language=language)
 
     return render(request, 'vocab/quick_add.html', {
         'language': language,
@@ -286,7 +286,7 @@ def edit_word(request, word_id):
     old_filter = word.word_filter
 
     if request.method == 'POST':
-        form = WordForm(request.POST, instance=word, user=request.user)
+        form = WordForm(request.POST, instance=word, user=request.user, language=language)
         if form.is_valid():
             updated_word = form.save()
 
@@ -305,7 +305,7 @@ def edit_word(request, word_id):
                 )
             return redirect('word_list')
     else:
-        form = WordForm(instance=word, user=request.user)
+        form = WordForm(instance=word, user=request.user, language=language)
 
     title = 'Редактировать слово' if language == 'ru' else 'Edit Word'
 
