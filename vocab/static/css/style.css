@@ -202,12 +202,6 @@ label {
     font-weight: bold;
 }
 
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 15px;
-    margin-bottom: 25px;
-}
 
 .stat-card {
     background-color: #eef4ff;
@@ -217,19 +211,6 @@ label {
     text-align: center;
 }
 
-.stat-number {
-    display: block;
-    font-size: 28px;
-    font-weight: bold;
-    color: #1565c0;
-}
-
-.stat-label {
-    display: block;
-    margin-top: 6px;
-    color: #2c3e50;
-    font-weight: bold;
-}
 
 .word-grid {
     display: flex;
@@ -334,4 +315,76 @@ label {
 
 .account-button:hover {
     background-color: #dceaff;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+    margin-bottom: 30px;
+}
+
+.stat-dropdown {
+    position: relative;
+}
+
+.stat-button {
+    width: 100%;
+    min-height: 116px;
+    background-color: #eef4ff !important;
+    color: #0f1f3d !important;
+    border: 1px solid #d6e4ff;
+    border-radius: 10px;
+    padding: 18px;
+    cursor: pointer;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    box-shadow: none;
+}
+
+.stat-button:hover {
+    background-color: #e2ecff !important;
+    color: #0f1f3d !important;
+}
+
+.stat-button:focus,
+.stat-button:active {
+    background-color: #dceaff !important;
+    color: #0f1f3d !important;
+    outline: none;
+}
+
+.stat-number {
+    display: block;
+    font-size: 32px;
+    font-weight: bold;
+    color: #1565c0;
+    line-height: 1;
+}
+
+.stat-label {
+    display: block;
+    color: #2c3e50;
+    font-weight: bold;
+    line-height: 1.3;
+}
+
+.stat-dropdown-content {
+    background-color: #eef4ff;
+    border: 1px solid #d6e4ff;
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-top: 10px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
+}
+
+.stat-dropdown-content ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.stat-dropdown-content p {
+    margin: 0;
 }

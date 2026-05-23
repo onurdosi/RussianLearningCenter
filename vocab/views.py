@@ -110,24 +110,20 @@ def home(request):
 
     total_words = user_words.count()
     total_filters = user_filters.count()
-    unfiltered_words = user_words.filter(word_filter__isnull=True).count()
+    practiced_words = user_words.filter(practiced_once=True).count()
 
-    largest_filter = None
-    largest_filter_count = 0
-
-    for word_filter in user_filters:
-        count = user_words.filter(word_filter=word_filter).count()
-        if count > largest_filter_count:
-            largest_filter = word_filter
-            largest_filter_count = count
+    if total_words > 0:
+        practiced_percentage = round((practiced_words / total_words) * 100)
+    else:
+        practiced_percentage = 0
 
     context = {
         'language': get_language(request),
         'total_words': total_words,
         'total_filters': total_filters,
-        'unfiltered_words': unfiltered_words,
-        'largest_filter': largest_filter,
-        'largest_filter_count': largest_filter_count,
+        'word_filters': user_filters,
+        'has_no_filter_words': user_words.filter(word_filter__isnull=True).exists(),
+        'practiced_percentage': practiced_percentage,
     }
 
     return render(request, 'vocab/home.html', context)
@@ -543,6 +539,9 @@ def practice_word(request):
         except Word.DoesNotExist:
             reset_practice_session()
             return redirect('practice_word')
+
+        current_word.practiced_once = True
+        current_word.save()
 
         practice_word_ids = request.session.get('practice_word_ids', [])
         practice_index = request.session.get('practice_index', 0)

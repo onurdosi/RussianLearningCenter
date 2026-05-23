@@ -48,10 +48,10 @@
         <button
             type="button"
             class="word-tile"
-            data-russian="{{ word.russian_word|escapejs }}"
-            data-translation="{{ word.translation|escapejs }}"
-            data-filter="{% if word.word_filter %}{{ word.word_filter.name|escapejs }}{% else %}{% if language == 'ru' %}Без фильтра{% else %}No Filter{% endif %}{% endif %}"
-            data-notes="{{ word.notes|escapejs }}"
+            data-russian="{{ word.russian_word }}"
+            data-translation="{{ word.translation }}"
+            data-filter="{% if word.word_filter %}{{ word.word_filter.name }}{% else %}{% if language == 'ru' %}Без фильтра{% else %}No Filter{% endif %}{% endif %}"
+            data-notes="{{ word.notes }}"
             data-edit-url="{% url 'edit_word' word.id %}"
             data-delete-url="{% url 'delete_word' word.id %}"
         >

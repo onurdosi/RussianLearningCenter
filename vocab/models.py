@@ -34,5 +34,7 @@ class Word(models.Model):
 
     notes = models.TextField(blank=True)
 
+    practiced_once = models.BooleanField(default=False)
+
     def __str__(self):
         return self.russian_word

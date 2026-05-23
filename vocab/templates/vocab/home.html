@@ -20,47 +20,106 @@
     {% endif %}
 
     <div class="stats-grid">
-        <div class="stat-card">
-            <span class="stat-number">{{ total_words }}</span>
-            <span class="stat-label">
-                {% if language == 'ru' %}Всего слов{% else %}Total Words{% endif %}
-            </span>
-        </div>
 
-        <div class="stat-card">
-            <span class="stat-number">{{ total_filters }}</span>
-            <span class="stat-label">
-                {% if language == 'ru' %}Фильтры{% else %}Filters{% endif %}
-            </span>
-        </div>
+        <div class="stat-dropdown">
+            <button
+                type="button"
+                class="stat-card stat-button"
+                onclick="toggleStatBox(event, 'words-details')"
+            >
+                <span class="stat-number">{{ total_words }}</span>
 
-        <div class="stat-card">
-            <span class="stat-number">{{ unfiltered_words }}</span>
-            <span class="stat-label">
-                {% if language == 'ru' %}Без фильтра{% else %}No Filter{% endif %}
-            </span>
-        </div>
-
-        <div class="stat-card">
-            <span class="stat-number">
-                {{ largest_filter_count }}
-            </span>
-            <span class="stat-label">
-                {% if largest_filter %}
-                    {{ largest_filter.name }}
-                {% else %}
+                <span class="stat-label">
                     {% if language == 'ru' %}
-                        Нет фильтров
+                        Всего слов
                     {% else %}
-                        No Filters
+                        Total Words
                     {% endif %}
-                {% endif %}
-            </span>
+                </span>
+            </button>
+
+            <div id="words-details" class="stat-dropdown-content hidden">
+                <p>
+                    <strong>
+                        {% if language == 'ru' %}
+                            Практиковалось:
+                        {% else %}
+                            Practised:
+                        {% endif %}
+                    </strong>
+
+                    {{ practiced_percentage }}%
+                </p>
+            </div>
         </div>
+
+        <div class="stat-dropdown">
+            <button
+                type="button"
+                class="stat-card stat-button"
+                onclick="toggleStatBox(event, 'filters-details')"
+            >
+                <span class="stat-number">{{ total_filters }}</span>
+
+                <span class="stat-label">
+                    {% if language == 'ru' %}
+                        Фильтры
+                    {% else %}
+                        Filters
+                    {% endif %}
+                </span>
+            </button>
+
+            <div id="filters-details" class="stat-dropdown-content hidden">
+
+                {% if word_filters %}
+                    <ul>
+                        {% for filter in word_filters %}
+                            <li>{{ filter.name }}</li>
+                        {% endfor %}
+
+                        {% if has_no_filter_words %}
+                            <li>
+                                {% if language == 'ru' %}
+                                    Без фильтра
+                                {% else %}
+                                    No Filter
+                                {% endif %}
+                            </li>
+                        {% endif %}
+                    </ul>
+
+                {% else %}
+
+                    <p>
+                        {% if language == 'ru' %}
+                            Нет фильтров
+                        {% else %}
+                            None
+                        {% endif %}
+                    </p>
+
+                    {% if has_no_filter_words %}
+                        <ul>
+                            <li>
+                                {% if language == 'ru' %}
+                                    Без фильтра
+                                {% else %}
+                                    No Filter
+                                {% endif %}
+                            </li>
+                        </ul>
+                    {% endif %}
+
+                {% endif %}
+            </div>
+        </div>
+
     </div>
 
     {% if language == 'ru' %}
         <h3>Что можно делать</h3>
+
         <ul>
             <li>Создавать собственные фильтры</li>
             <li>Организовывать слова по темам</li>
@@ -68,8 +127,11 @@
             <li>Добавлять заметки</li>
             <li>Использовать поиск</li>
         </ul>
+
     {% else %}
+
         <h3>What you can do</h3>
+
         <ul>
             <li>Create custom filters</li>
             <li>Organize words by topic</li>
@@ -77,5 +139,24 @@
             <li>Add notes</li>
             <li>Use search</li>
         </ul>
+
     {% endif %}
+
+    <script>
+        function toggleStatBox(event, id) {
+            const box = document.getElementById(id);
+            const button = event.currentTarget;
+
+            box.classList.toggle('hidden');
+
+            if (box.classList.contains('hidden')) {
+                button.classList.remove('active-stat');
+            } else {
+                button.classList.add('active-stat');
+            }
+
+            button.blur();
+        }
+    </script>
+
 {% endblock %}
